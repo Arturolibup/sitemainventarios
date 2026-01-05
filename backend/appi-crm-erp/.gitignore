@@ -1,0 +1,44 @@
+# ==============================
+# Laravel / PHP
+# ==============================
+/vendor/
+/storage/*.key
+/storage/app/**
+/storage/framework/**
+/storage/logs/**
+/bootstrap/cache/**
+/public/storage
+/public/hot
+/public/build
+/.phpunit.cache
+.phpunit.result.cache
+auth.json
+Homestead.json
+Homestead.yaml
+
+# ==============================
+# Environment files (CRÍTICO)
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Node / Frontend
+# ==============================
+/node_modules/
+/dist/
+/.angular/
+/.cache/
+npm-debug.log
+yarn-error.log
+
+# ==============================
+# IDE / OS
+# ==============================
+.vscode/
+.idea/
+.fleet/
+.DS_Store
+Thumbs.db
+*.log
