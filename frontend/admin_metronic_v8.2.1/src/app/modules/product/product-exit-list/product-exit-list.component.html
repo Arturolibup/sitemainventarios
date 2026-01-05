@@ -1,0 +1,158 @@
+
+    <!--begin::Toolbar-->
+        <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+            <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+                    Listado de Salidas de Productos
+                </h1>
+            </div>
+        </div>
+    
+    <!--end::Toolbar-->
+
+    <!-- Spinner de carga -->
+    <div *ngIf="isLoading" class="text-center" style="padding: 20px;">
+        <span class="spinner-border spinner-border-sm" style="color: #007bff;"></span> Cargando datos...
+    </div>
+
+    <!--begin::Content-->
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+            <div class="card" style="margin: 20px;">
+                <!-- Filtros -->
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px;">
+                    <h3 style="margin: 0; font-size: 1.5rem;">Filtros de Búsqueda</h3>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 1; min-width: 200px; max-width: 250px; display: flex; align-items: center;">
+                            <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Folio:</label>
+                            <input type="text" [(ngModel)]="filters.folio" (input)="applyFilters()" placeholder="Buscar por folio" style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;" />
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px; max-width: 250px; display: flex; align-items: center;">
+                            <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Área:</label>
+                            <input type="text" [(ngModel)]="filters.area" (input)="applyFilters()" placeholder="Buscar por área" style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;" />
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px; max-width: 250px; display: flex; align-items: center;">
+                            <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Subárea:</label>
+                            <input type="text" [(ngModel)]="filters.subarea" (input)="applyFilters()" placeholder="Buscar por subárea" style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;" />
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px; max-width: 250px; display: flex; align-items: center;">
+                            <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Fecha de Salida:</label>
+                            <input type="date" [(ngModel)]="filters.exit_date" (change)="applyFilters()" style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;" />
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px; max-width: 250px; display: flex; align-items: center;">
+                            <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Estado:</label>
+                            <select [(ngModel)]="filters.exit_status" (change)="applyFilters()" style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                                <option value="">Todos</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="completed">Completada</option>
+                            </select>
+                        </div>
+                        <button (click)="clearFilters()" style="background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Salidas -->
+                <div class="card-body pt-0" style="padding: 10px;">
+                    <div class="table-responsive" *ngIf="!isLoading && exits.length > 0">
+                        <h4 style="margin-bottom: 15px; font-size: 1.2rem;">Salidas Generales</h4>
+                        <table class="table table-striped" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Referencia</th>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Área</th>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Subárea</th>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Fecha de Salida</th>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Estado</th>
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">
+                                        Expira en 
+                                        <span *ngIf="expiringSoonCount > 0" class="badge badge-danger" style="background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 50%; margin-left: 5px;">{{ expiringSoonCount }}</span>
+                                    </th>
+                                    <!--<th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Creado Por</th>-->
+                                    <th style="font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ddd; background-color: #f8f9fa;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let exit of exits">
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">
+                                        <a href="javascript:void(0)" (click)="showProductDetails(exit)" style="color: #007bff; text-decoration: underline; cursor: pointer;">{{ exit.reference }}</a>
+                                    </td>
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">{{ exit.area?.name || 'N/A' }}</td>
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">{{ exit.subarea?.name || 'N/A' }}</td>
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">{{ exit.exit_date | date:'dd/MM/yyyy' }}</td>
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">
+                                        <span [ngStyle]="{'color': isPending(exit) ? '#ffc107' : '#28a745'}">
+                                            {{ isPending(exit) ? 'Pendiente' : 'Completada' }}
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">
+                                        {{ isPending(exit) && exit.pending_expires_at ? (exit.pending_expires_at | date:'dd/MM/yyyy HH:mm' : 'America/Mazatlan') : 'N/A' }}
+                                    </td>
+                                    <!--<td style="text-align: center; padding: 10px; border: 1px solid #ddd;">{{ exit.created_by_name || 'N/A' }}</td>-->
+                                    <td style="text-align: center; padding: 10px; border: 1px solid #ddd; white-space: nowrap;">
+                                        <button (click)="editExit(exit.id)" style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-right: 5px; cursor: pointer; position: relative;">
+                                            Editar
+                                            <span *ngIf="isExpiringSoon(exit)" style="position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: red; border-radius: 50%;"></span>
+                                        </button>
+                                        <button *ngIf="isPending(exit)" (click)="completeExit(exit.id)" style="background-color: #ff851b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                                            Completar
+                                        </button>
+                                        <button (click)="downloadExitPdf(exit.id)" style="background-color: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-right: 5px; cursor: pointer;">
+                                            PDF
+                                        </button>
+                                        <button (click)="printPdf(exit.id)" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-right: 5px; cursor: pointer;">
+                                            Imprimir
+                                        </button>
+                                        <button (click)="deleteExit(exit.id)" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-right: 5px; cursor: pointer;">
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mensaje si no hay datos -->
+                    <div *ngIf="!isLoading && exits.length === 0" style="text-align: center; padding: 20px; color: #6c757d;">
+                        No hay salidas para mostrar con los filtros actuales.
+                    </div>
+
+                    <!-- Paginación -->
+                    <!-- Mensaje si no hay datos -->
+                    <div *ngIf="!isLoading && exits.length === 0" style="text-align: center; padding: 20px; color: #6c757d;">
+                        No hay salidas para mostrar con los filtros actuales.
+                    </div>
+
+                    <!-- Paginación -->
+                    <div *ngIf="!isLoading && exits.length > 0" style="margin-top: 10px; display: block; text-align: center;">
+                        <div *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; gap: 5px;">
+                            <button (click)="loadExits(currentPage - 1)" [disabled]="currentPage === 1" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" [ngStyle]="{'opacity': currentPage === 1 ? 0.5 : 1}">
+                                Anterior
+                            </button>
+                            <span style="font-size: 0.9rem; margin: 0 10px;">Página {{ currentPage }} de {{ totalPages }}</span>
+                            <button (click)="loadExits(currentPage + 1)" [disabled]="currentPage === totalPages" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" [ngStyle]="{'opacity': currentPage === totalPages ? 0.5 : 1}">
+                                Siguiente
+                            </button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px; justify-content: center; margin-top: 10px;">
+                            <label style="margin: 0; font-size: 0.9rem;">Entradas por página:</label>
+                            <select 
+                                [(ngModel)]="perPage" 
+                                (ngModelChange)="onPerPageChange()" 
+                                style="padding: 5px; border-radius: 4px; font-size: 0.9rem;"
+                            >
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    <!--end::Content-->
+
+   

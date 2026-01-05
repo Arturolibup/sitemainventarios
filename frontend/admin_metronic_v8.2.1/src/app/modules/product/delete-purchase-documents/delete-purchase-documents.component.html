@@ -1,0 +1,37 @@
+<div class="d-flex flex-column flex-column-fluid">
+    <!--begin::Toolbar-->
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+      <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+          <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+            Eliminar Documento Oficial
+          </h1>
+        </div>
+      </div>
+    </div>
+    <!--end::Toolbar-->
+    <div *ngIf="isLoading$ | async" class="text-center">
+      <span class="spinner-border spinner-border-sm"></span> Cargando datos...
+    </div>
+    <!--begin::Content-->
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+      <div id="kt_app_content_container" class="app-container container-xxl">
+        <div class="card card-flush py-4">
+          <div class="card-header">
+            <h2 class="card-title fs-3">Confirmar Eliminación</h2>
+          </div>
+          <div class="card-body pt-0">
+            <p>¿Estás seguro de que deseas eliminar este documento oficial? Esta acción no se puede deshacer.</p>
+            <div class="d-flex justify-content-end gap-3">
+              <!--<button type="button" class="btn btn-light" (click)="cancel()">Cancelar</button>-->
+              <button type="button" class="btn btn-danger" (click)="deleteDocument()">
+                <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+                <span class="indicator-label">Eliminar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--end::Content-->
+  </div>

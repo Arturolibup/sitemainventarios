@@ -1,0 +1,247 @@
+<div class="modal-content" style="max-width: 1200px; width: 100%; margin: auto;">
+  <div class="modal-header">
+    <h2 class="fw-bolder">Crear Vehículo</h2>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body px-4 py-3">
+    <form [formGroup]="form" (ngSubmit)="store()">
+      <!-- Sección 1: Subárea y Área -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-12">
+          <label class="required fw-bold fs-6 mb-2">Subárea</label>
+          <input type="text" [formControl]="subareaSearch"
+                 class="form-control form-control-solid"
+                 placeholder="Buscar subárea"
+                 [ngbTypeahead]="searchSubareas"
+                 [resultFormatter]="subareaFormatter"
+                 [inputFormatter]="subareaFormatter"
+                 (selectItem)="onSubareaChange($event.item)" />
+          <div *ngIf="subareaSearch.invalid && subareaSearch.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">La subárea es requerida.</div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <label class="fw-bold fs-6 mb-2">Área</label>
+          <input type="text" formControlName="area_name"
+                 class="form-control form-control-solid"
+                 readonly />
+        </div>
+      </div>
+
+      <!-- Sección 2: Identificación básica -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label class="required fw-bold fs-6 mb-2">N° Económico</label>
+          <input type="text" formControlName="numero_eco"
+                 class="form-control form-control-solid"
+                 placeholder="Ej. 12345"
+                 (input)="toUpperCase('numero_eco')"
+                 (blur)="validateUniqueness('numero_eco', form.value.numero_eco)" />
+          <div *ngIf="form.get('numero_eco')?.invalid && form.get('numero_eco')?.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El número económico es requerido.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="fw-bold fs-6 mb-2">Placa Actual</label>
+              <input type="text" formControlName="placa"
+                     class="form-control form-control-solid"
+                     placeholder="Ej. ABC123"
+                     (input)="toUpperCase('placa')"
+                     (blur)="validateUniqueness('placa', form.value.placa)" />
+            </div>
+            <div class="col-md-6">
+              <label class="fw-bold fs-6 mb-2">Placa Anterior</label>
+              <input type="text" formControlName="placa_anterior"
+                     class="form-control form-control-solid"
+                     placeholder="Ej. XYZ789"
+                     (input)="toUpperCase('placa_anterior')" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="fw-bold fs-6 mb-2">Cilindros</label>
+          <input type="text" formControlName="cilindro"
+                 class="form-control form-control-solid"
+                 placeholder="Ej. 4"
+                 (input)="toUpperCase('cilindro')" />
+        </div>
+      </div>
+
+      <!-- Sección 3: Características técnicas -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="required fw-bold fs-6 mb-2">Marca</label>
+          <div class="input-group">
+            <input type="text" [formControl]="marcaSearch"
+                   class="form-control form-control-solid"
+                   placeholder="Buscar marca"
+                   [ngbTypeahead]="searchMarcas"
+                   [resultFormatter]="marcaFormatter"
+                   [inputFormatter]="marcaFormatter"
+                   (selectItem)="onMarcaChange($event.item)" />
+            <div class="input-group-text">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="addNewMarca" formControlName="add_new_marca" />
+                <label class="form-check-label small" for="addNewMarca">Nueva</label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="form.value.add_new_marca" class="mt-2 d-flex gap-2">
+            <input type="text" formControlName="new_marca"
+                   class="form-control form-control-solid"
+                   placeholder="Nombre marca"
+                   (input)="toUpperCase('new_marca')" />
+            <button type="button" class="btn btn-primary btn-sm"
+                    (click)="createMarca()"
+                    [disabled]="form.get('new_marca')?.invalid || isLoading">
+              <i class="fas fa-check"></i>
+            </button>
+          </div>
+          <div *ngIf="marcaSearch.invalid && marcaSearch.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">La marca es requerida.</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Tipo</label>
+          <div class="input-group">
+            <input *ngIf="!form.value.add_new_tipo" type="text" [formControl]="tipoSearch"
+                   class="form-control form-control-solid"
+                   placeholder="Buscar tipo"
+                   [ngbTypeahead]="searchTipos"
+                   [resultFormatter]="tipoFormatter"
+                   [inputFormatter]="tipoFormatter"
+                   (selectItem)="onTypeChange($event.item)"
+                   [ngClass]="{'is-invalid': tipoSearch.invalid && tipoSearch.touched}" />
+            <input *ngIf="form.value.add_new_tipo" type="text" formControlName="new_tipo"
+                   class="form-control form-control-solid"
+                   placeholder="Nuevo tipo"
+                   (input)="toUpperCase('new_tipo')"
+                   [ngClass]="{'is-invalid': form.get('new_tipo')?.invalid && form.get('new_tipo')?.touched}" />
+            <div class="input-group-text">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="addNewTipo" formControlName="add_new_tipo" />
+                <label class="form-check-label small" for="addNewTipo">Nuevo</label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!form.value.add_new_tipo && tipoSearch.invalid && tipoSearch.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El tipo es requerido.</div>
+          </div>
+          <div *ngIf="form.value.add_new_tipo && form.get('new_tipo')?.invalid && form.get('new_tipo')?.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El nuevo tipo es requerido.</div>
+          </div>
+          <div *ngIf="form.value.add_new_tipo" class="mt-2 d-flex gap-2">
+            <button type="button" class="btn btn-primary btn-sm ms-auto"
+                    (click)="createTipo()"
+                    [disabled]="form.get('new_tipo')?.invalid || isLoading">
+              <i class="fas fa-check"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="fw-bold fs-6 mb-2">Modelo</label>
+              <input type="text" formControlName="modelo"
+                     class="form-control form-control-solid"
+                     placeholder="Año"
+                     (input)="toUpperCase('modelo')" />
+            </div>
+            <div class="col-md-6">
+              <label class="fw-bold fs-6 mb-2">Color</label>
+              <input type="text" formControlName="color"
+                     class="form-control form-control-solid"
+                     placeholder="Ej. Blanco"
+                     (input)="toUpperCase('color')" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección 4: Números de serie, inventario y estado -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Número de Serie</label>
+          <input type="text" formControlName="numero_serie"
+                 class="form-control form-control-solid"
+                 placeholder="Ej. 1HGCM82633A004352"
+                 (input)="toUpperCase('numero_serie')"
+                 (blur)="validateUniqueness('numero_serie', form.value.numero_serie)" />
+        </div>
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Número de Inventario</label>
+          <input type="text" formControlName="numero_inven"
+                 class="form-control form-control-solid"
+                 placeholder="Ej. INV123"
+                 (input)="toUpperCase('numero_inven')"
+                 (blur)="validateUniqueness('numero_inven', form.value.numero_inven)" />
+        </div>
+        <div class="col-md-4">
+          <label class="required fw-bold fs-6 mb-2">Estado del Vehículo</label>
+          <select formControlName="state" class="form-select form-select-solid">
+            <option value="">Seleccione</option>
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+          <div *ngIf="form.get('state')?.invalid && form.get('state')?.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El estado del vehículo es requerido.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección 5: Imagen y Estados -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Imagen del Vehículo</label>
+          <input type="file"
+                 class="form-control form-control-solid"
+                 (change)="processFile($event)"
+                 accept=".jpeg,.jpg,.png,.gif,.webp" />
+          <div *ngIf="IMAGEN_PREVISUALIZA" class="text-center mt-3">
+            <img [src]="IMAGEN_PREVISUALIZA"
+                 alt="Vista Previa"
+                 class="img-thumbnail rounded"
+                 style="max-width: 250px; max-height: 200px; object-fit: cover;">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Estado Actual</label>
+          <select formControlName="estado_actual" class="form-select form-select-solid">
+            <option value="">Seleccione</option>
+            <option *ngFor="let estado of estadosActuales" [value]="estado">{{ estado }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="fw-bold fs-6 mb-2">Estado Asignación</label>
+          <select formControlName="estado_asigna" class="form-select form-select-solid">
+            <option value="">Seleccione</option>
+            <option *ngFor="let estado of estadosAsigna" [value]="estado">{{ estado }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div *ngIf="isLoading"
+           class="overlay-layer rounded bg-dark bg-opacity-5 d-flex align-items-center justify-content-center"
+           style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1050;">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-end gap-3 pt-4 border-top">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss()">
+          <i class="fas fa-times me-2"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
+          <span *ngIf="!isLoading"><i class="fas fa-save me-2"></i> Guardar Vehículo</span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

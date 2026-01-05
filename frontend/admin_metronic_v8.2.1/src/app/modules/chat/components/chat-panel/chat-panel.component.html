@@ -1,0 +1,180 @@
+<ng-container *ngIf="currentUser">
+
+  <div class="card shadow-sm border-0 h-100 d-flex flex-column">
+
+    <!-- HEADER GENERAL / DINÁMICO -->
+    <div class="card-header d-flex justify-content-between align-items-center py-2">
+
+      <!-- IZQUIERDA -->
+      <div class="d-flex align-items-center min-w-0">
+
+        <!-- BOTÓN REGRESAR SOLO EN CHAT ACTIVO -->
+        <button
+          *ngIf="selectedConversation"
+          class="btn btn-sm btn-icon btn-light me-2"
+          type="button"
+          (click)="onBackToUsers()"
+        >
+          <i class="bi bi-arrow-left"></i>
+        </button>
+
+        <!-- ICONO -->
+        <i
+          class="bi"
+          [ngClass]="selectedConversation ? 'bi-chat-left-text' : 'bi-chat-dots'"
+          class="fs-4 me-2 text-primary"
+        ></i>
+
+        <!-- TÍTULO -->
+        <div class="fw-bold text-truncate">
+          {{ selectedConversation ? getSelectedConversationTitle() : 'Chat interno' }}
+        </div>
+      </div>
+
+      <!-- DERECHA -->
+      <span
+        *ngIf="!selectedConversation && unreadTotal > 0"
+        class="badge badge-circle badge-danger"
+      >
+        {{ unreadTotal }}
+      </span>
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body chat-body">
+
+      <!-- ========================= -->
+      <!-- LISTA DE USUARIOS -->
+      <!-- ========================= -->
+      <div
+        class="chat-user-list border-end"
+        *ngIf="!selectedConversation"
+      >
+
+        <!-- Loader -->
+        <div *ngIf="loadingUsers" class="text-center py-5 text-muted">
+          <div class="spinner-border spinner-border-sm me-2"></div>
+          Cargando usuarios...
+        </div>
+
+        <!-- Scroll -->
+        <div class="chat-user-scroll p-2" *ngIf="!loadingUsers">
+
+          <!-- ONLINE -->
+          <ng-container *ngIf="onlineUsers.length > 0">
+            <div class="text-uppercase text-muted fw-bold small px-2 mb-2">
+              En línea ({{ onlineUsers.length }})
+            </div>
+
+            <div
+              *ngFor="let item of onlineUsers"
+              class="d-flex align-items-center p-2 rounded hover-bg cursor-pointer mb-1"
+              (click)="onUserSelected(item)"
+            >
+              <div class="me-3 position-relative">
+                <img
+                  [src]="item.user.avatar_url || 'assets/media/avatars/blank.png'"
+                  class="rounded-circle"
+                  width="42"
+                  height="42"
+                />
+                <span
+                  class="position-absolute bottom-0 end-0 translate-middle p-1 rounded-circle bg-success"
+                ></span>
+              </div>
+
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold text-truncate">
+                  {{ item.user.name }}
+                </div>
+                <small class="text-muted text-truncate d-block">
+                  {{ item.conversation?.last_message?.body || 'Sin mensajes aún' }}
+                </small>
+              </div>
+
+              <span
+                *ngIf="item.conversation?.unread_count"
+                class="badge badge-light-danger ms-2"
+              >
+                {{ item.conversation?.unread_count }}
+              </span>
+            </div>
+          </ng-container>
+
+          <!-- OFFLINE -->
+          <ng-container *ngIf="offlineUsers.length > 0">
+            <div class="text-uppercase text-muted fw-bold small px-2 mt-4 mb-2">
+              Desconectados ({{ offlineUsers.length }})
+            </div>
+
+            <div
+              *ngFor="let item of offlineUsers"
+              class="d-flex align-items-center p-2 rounded hover-bg cursor-pointer mb-1 opacity-75"
+              (click)="onUserSelected(item)"
+            >
+              <div class="me-3 position-relative">
+                <img
+                  [src]="item.user.avatar_url || 'assets/media/avatars/blank.png'"
+                  class="rounded-circle"
+                  width="42"
+                  height="42"
+                />
+                <span
+                  class="position-absolute bottom-0 end-0 translate-middle p-1 rounded-circle bg-secondary"
+                ></span>
+              </div>
+
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold text-truncate">
+                  {{ item.user.name }}
+                </div>
+                <small class="text-muted text-truncate d-block">
+                  {{ item.conversation?.last_message?.body || 'Sin mensajes aún' }}
+                </small>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- VACÍO -->
+          <div
+            *ngIf="onlineUsers.length === 0 && offlineUsers.length === 0"
+            class="text-center text-muted py-5"
+          >
+            No hay usuarios disponibles
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- CHAT ACTIVO -->
+      <!-- ========================= -->
+      <div class="chat-right">
+
+        <ng-container *ngIf="selectedConversation; else emptyChat">
+
+          <app-chat-window
+            class="chat-window-flex"
+            [conversation]="selectedConversation"
+            [currentUser]="currentUser"
+            (newMessage)="onNewMessage($event)"
+            (conversationRead)="onConversationRead($event)"
+          ></app-chat-window>
+
+        </ng-container>
+
+        <!-- PLACEHOLDER -->
+        <ng-template #emptyChat>
+          <div class="chat-empty">
+            <i class="bi bi-chat-dots fs-1 mb-2"></i>
+            <div class="fw-semibold">Selecciona un usuario</div>
+            <small>o inicia una conversación nueva</small>
+          </div>
+        </ng-template>
+
+      </div>
+
+    </div>
+  </div>
+
+</ng-container>

@@ -1,0 +1,230 @@
+<!--begin::Modal content edit-->
+<div class="modal-content">
+    <!--begin::Modal header-->
+    <div class="modal-header" id="kt_modal_add_user_header">
+      <!--begin::Modal title-->
+      <h2 class="fw-bolder">Editar Usuario: {{USER_SELECTED.full_name}}</h2>
+      <!--end::Modal title-->
+      <!--begin::Close-->
+      <div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close" (click)="modal.dismiss()">
+        <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+        <span class="svg-icon svg-icon-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+            <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+          </svg>
+        </span>
+        <!--end::Svg Icon-->
+      </div>
+      <!--end::Close-->
+    </div>
+    <!--end::Modal header-->
+    <!--begin::Modal body-->
+    <div class="modal-body">
+      <!--begin::Form-->
+      <form id="kt_modal_add_user_form" class="form" action="#" #userForm="ngForm">
+        <!--begin::Scroll-->
+        <div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_add_user_scroll" 
+             data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" 
+             data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header" 
+             data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
+             
+          <!-- Agrupación: Información Personal -->
+          <fieldset class="mb-4 p-3 border rounded"> 
+            <legend class="w-auto px-2" style="font-size: 1rem;">Información Personal</legend>
+            <!-- Mejorado: Se utiliza fieldset y legend para agrupar y dar semántica -->
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Nombre</label>
+                <input type="text" name="name" class="form-control form-control-solid" placeholder="Nombre" [(ngModel)]="name" required />
+                <!-- Mejorado: Validación en tiempo real (mostrar error si es necesario) -->
+                <div *ngIf="userForm.submitted && !name" class="text-danger small">El nombre es requerido.</div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Apellido</label>
+                <input type="text" name="surname" class="form-control form-control-solid" placeholder="Apellido" [(ngModel)]="surname" required />
+                <!-- Mejorado: Validación en tiempo real -->
+                <div *ngIf="userForm.submitted && !surname" class="text-danger small">El apellido es requerido.</div>
+              </div>
+            </div>
+          </fieldset>
+          
+          <!-- Agrupación: Datos de Contacto -->
+          <fieldset class="mb-4 p-3 border rounded">
+            <legend class="w-auto px-2" style="font-size: 1rem;">Datos de Contacto</legend>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Correo Electrónico</label>
+                <input type="email" name="email" class="form-control form-control-solid" placeholder="example@gmail.com" [(ngModel)]="email" required />
+                <div *ngIf="userForm.submitted && !email" class="text-danger small">El correo es requerido.</div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Teléfono</label>
+                <input type="text" name="phone" class="form-control form-control-solid" placeholder="999-999-99-99" [(ngModel)]="phone" required />
+                <div *ngIf="userForm.submitted && !phone" class="text-danger small">El teléfono es requerido.</div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="required fw-bold fs-6 mb-2">Dirección</label>
+              <input type="text" name="address" class="form-control form-control-solid" placeholder="Dirección" [(ngModel)]="address" required />
+              <div *ngIf="userForm.submitted && !address" class="text-danger small">La dirección es requerida.</div>
+            </div>
+          </fieldset>
+          
+          <!-- Agrupación: Detalles de Identificación -->
+          <fieldset class="mb-4 p-3 border rounded">
+            <legend class="w-auto px-2" style="font-size: 1rem;">Detalles de Identificación</legend>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Género</label>
+                <div class="d-flex align-items-center">
+                  <div class="form-check me-3">
+                    <input class="form-check-input" type="radio" name="gender" [checked]="gender == 'MASCULINO'" (click)="gender = 'MASCULINO'" id="gender1" >
+                    <label class="form-check-label" for="gender1">Masculino</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender" [checked]="gender == 'FEMENINO'" (click)="gender = 'FEMENINO'" id="gender2">
+                    <label class="form-check-label" for="gender2">Femenino</label>
+                  </div>
+                </div>
+                <!-- Mejorado: Grupo de radio buttons con espacio uniforme -->
+              </div>
+              <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Número de Empleado</label>
+                <input type="text" name="n_document" class="form-control form-control-solid" placeholder="Número de Empleado" [(ngModel)]="n_document" required>
+                <div *ngIf="userForm.submitted && !n_document" class="text-danger small">El número de Empleado.</div>
+                <!--<label class="required fw-bold fs-6 mb-2">Tipo de Documento</label>
+                <input type="text" name="type_document" class="form-control form-control-solid" placeholder="Tipo de identificación" [(ngModel)]="type_document" required>
+                <div *ngIf="userForm.submitted && !type_document" class="text-danger small">Identificación</div>-->
+              </div>
+            </div>
+          </fieldset>
+          
+          <!-- Agrupación: Selección de Rol y Avatar -->
+          <fieldset class="mb-4 p-3 border rounded">
+            <legend class="w-auto px-2" style="font-size: 1rem;">Rol y Avatar</legend>
+            <div class="row">
+              <div class="col-md-12 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Roles:</label>
+                <select name="role_selected" 
+                    class="form-control form-select-solid fw-bolder" 
+                    [(ngModel)]="role_id" >
+                  <option value="">Selec. Rol</option>
+                  <!-- Se asume que 'roles' es un array con la lista de roles -->
+                  <ng-container *ngFor ="let rol of roles">
+                    <option [value]="rol.id">
+                        {{rol.name}}
+                    </option>
+                  </ng-container>
+                </select>
+                <div *ngIf="userForm.submitted && !role_id" class="text-danger small">El Rol es requerido.</div>
+              </div>
+              <!-- <div class="col-md-6 mb-4">
+                <label class="required fw-bold fs-6 mb-2">Sucursal</label>
+                <select name="sucursal_id" class="form-control form-select-solid fw-bolder" [(ngModel)]="sucursal_id" required>
+                  <option value="">Seleccione Sucursal</option>
+                  Se asume que 'sucursales' es un array con la lista de sucursales 
+                  
+                </select>
+                <div *ngIf="userForm.submitted && !sucursal_id" class="text-danger small">La sucursal es requerida.</div>
+              </div>-->
+            </div>
+            <div class="row">
+              <div class="col-md-12 mb-4">
+                <label class="requerid fw-bold fs-6 mb-2">Avatar</label>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="customFile"  
+                         accept=".jpeg, .bmp, .jpg, .png, .gif, .webp" (change)="processFile($event)">
+                  <!--<label class="custom-file-label" for="customFile">Subir imagen</label> -->
+                </div>
+                <!-- Mejorado: Se podría agregar vista previa de imagen (por ejemplo, usando *ngIf para mostrar avatarPreview) -->
+                <div *ngIf="imagen_previzualiza">
+                  <img [src]="imagen_previzualiza" alt="" style="max-width: 100px;">
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <div class="row">
+            <div class="col-md-12 mb-4 position-relative">
+              <label class="fw-bold fs-6 mb-2">Subárea</label>
+
+              <!-- Campo de búsqueda -->
+              <input
+                type="text"
+                class="form-control form-control-solid"
+                placeholder="Escribe para buscar subárea..."
+                [(ngModel)]="subarea_search"
+                name="subarea_search"
+                (input)="onSearchSubarea($event)"
+              />
+
+              <!-- Menú desplegable -->
+              <div
+                class="dropdown-menu w-100"
+                [class.show]="subarea_results.length > 0"
+                style="position: absolute; z-index: 1050; max-height: 200px; overflow-y: auto;"
+              >
+                <a
+                  class="dropdown-item"
+                  *ngFor="let sub of subarea_results"
+                  (click)="selectSubarea(sub)"
+                >
+                  {{ sub.name }} ({{ sub.localidad }} - {{ sub.municipio || sub.area?.name || '' }})
+                </a>
+                <div *ngIf="subarea_results.length === 0" class="dropdown-item text-muted">
+                  No se encontraron subáreas.
+                </div>
+              </div>
+
+              <!-- Subárea actual si no se está buscando -->
+              <small *ngIf="!subarea_results.length && USER_SELECTED?.subarea?.name" class="text-muted">
+                Subárea actual: {{ USER_SELECTED.subarea.name }}
+              </small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 mb-4">
+              <label class="fw-bold fs-6 mb-2">Área (Autollenada)</label>
+              <input type="text" class="form-control form-control-solid" 
+              [value]="area_name || USER_SELECTED?.area?.name" readonly />
+              <small *ngIf="!area_name && USER_SELECTED?.area?.name" class="text-muted">
+      Área actual: {{ USER_SELECTED.area.name }}
+    </small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Contraseña</label>
+              <input type="password" name="password" class="form-control form-control-solid" placeholder="password" [(ngModel)]="password" />
+              <!-- Mejorado: Validación en tiempo real (mostrar error si es necesario) 
+              <div *ngIf="userForm.submitted && !password" class="text-danger small">La contraseña es requerida.</div>-->
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Repetir Contraseña</label>
+              <input type="password" name="password" class="form-control form-control-solid" placeholder="repetir password" [(ngModel)]="password_repeat" />
+              <!-- Mejorado: Validación en tiempo real 
+              <div *ngIf="userForm.submitted && !password" class="text-danger small">La contraseña no coincide.</div>-->
+            </div>
+          </div>
+        </div>
+        <!--end::Scroll-->
+        
+        <!--begin::Actions-->
+        <div class="text-center pt-15">
+          <button type="reset" class="btn btn-light me-3" (click)="modal.dismiss()">Cerrar</button>
+          <!-- Mejorado: El botón se deshabilita si el formulario es inválido -->
+          <button type="button" class="btn btn-primary" 
+                  
+                  (click)="store()" data-kt-users-modal-action="submit">
+            <span class="indicator-label">Register</span>
+            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading | async"></span>
+          </button>
+        </div>
+        <!--end::Actions-->
+      </form>
+      <!--end::Form-->
+    </div>
+    <!--end::Modal body-->
+  </div>
+
+  

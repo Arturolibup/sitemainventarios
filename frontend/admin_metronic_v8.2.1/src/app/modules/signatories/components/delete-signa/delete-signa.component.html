@@ -1,0 +1,208 @@
+<!--begin::Modal content DELETE-->
+<div class="modal-content">
+  <!--begin::Modal header-->
+  <div class="modal-header border-0 pb-0">
+    <!--begin::Close-->
+    <div class="btn btn-icon btn-sm btn-active-color-primary ms-auto" (click)="modal.dismiss()">
+      <i class="ki-duotone ki-cross fs-1">
+        <span class="path1"></span>
+        <span class="path2"></span>
+      </i>
+    </div>
+    <!--end::Close-->
+  </div>
+  <!--end::Modal header-->
+  
+  <!--begin::Modal body-->
+  <div class="modal-body pt-0 pb-15 px-10">
+    
+    <!-- Icono de advertencia -->
+    <div class="text-center mb-10">
+      <div class="symbol symbol-100px symbol-circle mb-5">
+        <div class="symbol-label bg-light-danger">
+          <i class="ki-duotone ki-trash fs-2x text-danger">
+            <span class="path1"></span>
+            <span class="path2"></span>
+            <span class="path3"></span>
+            <span class="path4"></span>
+          </i>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Advertencia de uso (NUEVA SECCIÓN) -->
+    <div *ngIf="showUsageWarning" class="alert alert-warning mb-8">
+      <div class="d-flex align-items-center">
+        <i class="ki-duotone ki-shield-tick fs-2x text-warning me-4">
+          <span class="path1"></span>
+          <span class="path2"></span>
+        </i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-5">Firmante en uso</span>
+          <span class="text-gray-700">
+            Este firmante no puede ser eliminado porque está siendo utilizado en el sistema.
+          </span>
+          
+          <!-- Detalles de uso (si están disponibles) -->
+          <div *ngIf="usageDetails" class="mt-2">
+            <small class="text-muted d-block">
+              <i class="ki-duotone ki-document fs-3 me-1"></i>
+              Documentos asociados: {{usageDetails.total || 0}}
+            </small>
+          </div>
+          
+          <!-- Recomendación -->
+          <div class="mt-3">
+            <span class="fw-bold text-dark">Recomendación:</span>
+            <span class="text-gray-700 ms-2">
+              Desactive el firmante para mantener el historial de documentos.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Título y mensaje -->
+    <div class="text-center mb-10">
+      <h2 class="fw-bold text-dark mb-5">
+        <span *ngIf="!showUsageWarning">¿Eliminar Firmante?</span>
+        <span *ngIf="showUsageWarning">Firmante en uso</span>
+      </h2>
+      
+      <div class="text-muted fw-semibold fs-5 mb-8">
+        <span *ngIf="!showUsageWarning">Estás a punto de eliminar el siguiente firmante:</span>
+        <span *ngIf="showUsageWarning">El siguiente firmante no puede ser eliminado:</span>
+      </div>
+      
+      <!-- Información del firmante -->
+      <div class="alert alert-danger d-flex align-items-center p-5 mb-8">
+        <i class="ki-duotone ki-information fs-2x text-danger me-4">
+          <span class="path1"></span>
+          <span class="path2"></span>
+          <span class="path3"></span>
+        </i>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-4">{{signatory?.name}}</span>
+          <span class="text-muted">{{signatory?.departament}} - {{signatory?.position}}</span>
+          <span *ngIf="signatory?.title" class="text-muted mt-1">Título: {{signatory?.title}}</span>
+          <span class="text-muted mt-1">ID: {{signatory?.id}}</span>
+          <span class="text-muted mt-1">Estado: 
+            <span [class.text-success]="signatory?.is_active" [class.text-danger]="!signatory?.is_active">
+              {{signatory?.is_active ? 'Activo' : 'Inactivo'}}
+            </span>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Advertencia (solo si no hay advertencia de uso) -->
+      <div *ngIf="!showUsageWarning" class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6">
+        <i class="ki-duotone ki-information fs-2x text-warning me-4">
+          <span class="path1"></span>
+          <span class="path2"></span>
+          <span class="path3"></span>
+        </i>
+        <div class="d-flex flex-stack flex-grow-1">
+          <div class="fw-semibold">
+            <div class="fs-6 text-gray-700">
+              <span class="fw-bold text-warning">Advertencia:</span> 
+              Esta acción no se puede deshacer. Todos los datos asociados serán eliminados permanentemente.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Confirmación por texto (SOLO si no hay advertencia de uso) -->
+    <div *ngIf="!showUsageWarning" class="fv-row mb-10">
+      <label class="form-label fw-bold text-dark required">
+        Escribe <span class="text-danger fw-bold">"ELIMINAR"</span> para confirmar:
+      </label>
+      <input 
+        type="text" 
+        class="form-control form-control-solid" 
+        placeholder="Escribe ELIMINAR aquí..." 
+        [(ngModel)]="confirmText"
+        [class.is-valid]="getConfirmationStatus() === 'valid'"
+        [class.is-invalid]="getConfirmationStatus() === 'invalid'"
+        (keyup.enter)="delete()"
+        autocomplete="off"
+      />
+      
+      <!-- Mensajes de validación -->
+      <div *ngIf="confirmText && getConfirmationStatus() === 'valid'" class="valid-feedback fw-semibold">
+        <i class="ki-duotone ki-check fs-4 text-success me-2">
+          <span class="path1"></span>
+          <span class="path2"></span>
+        </i>
+        Confirmación válida
+      </div>
+      
+      <div *ngIf="confirmText && getConfirmationStatus() === 'invalid'" class="invalid-feedback fw-semibold">
+        <i class="ki-duotone ki-cross fs-4 text-danger me-2">
+          <span class="path1"></span>
+          <span class="path2"></span>
+        </i>
+        El texto debe ser exactamente "ELIMINAR"
+      </div>
+      
+      <div class="form-text mt-2">
+        Esta medida de seguridad previene eliminaciones accidentales.
+      </div>
+    </div>
+    
+    <!-- Botones de acción -->
+    <div class="text-center">
+      <!-- Botón Cancelar -->
+      <button type="button" class="btn btn-light me-3" (click)="modal.dismiss()" [disabled]="isLoading">
+        Cancelar
+      </button>
+      
+      <!-- Botón para desactivar (solo visible cuando hay advertencia de uso) -->
+      <button *ngIf="showUsageWarning && showDeactivateOption" 
+              type="button" class="btn btn-warning me-3" 
+              (click)="deactivateInstead()" 
+              [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          <i class="ki-duotone ki-shield-cross fs-2 me-2"></i>
+          Desactivar Firmante
+        </span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm align-middle me-2"></span>
+          Desactivando...
+        </span>
+      </button>
+      
+      <!-- Botón Eliminar (solo visible cuando NO hay advertencia de uso) -->
+      <button *ngIf="!showUsageWarning" 
+              type="button" class="btn btn-danger" 
+              (click)="delete()" 
+              [disabled]="!isConfirmationValid() || isLoading">
+        <span *ngIf="!isLoading">
+          <i class="ki-duotone ki-trash fs-2 me-2"></i>
+          Eliminar Permanentemente
+        </span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm align-middle me-2"></span>
+          Procesando...
+        </span>
+      </button>
+    </div>
+    
+    <!-- Nota informativa -->
+    <div class="text-center mt-8">
+      <small class="text-muted">
+        <i class="ki-duotone ki-information fs-3 me-1"></i>
+        <strong>Nota:</strong> 
+        <span *ngIf="!showUsageWarning">
+          Los firmantes sin uso pueden ser eliminados permanentemente.
+        </span>
+        <span *ngIf="showUsageWarning">
+          Los firmantes en uso solo pueden ser desactivados para preservar el historial.
+        </span>
+      </small>
+    </div>
+    
+  </div>
+  <!--end::Modal body-->
+</div>
+<!--end::Modal content DELETE-->

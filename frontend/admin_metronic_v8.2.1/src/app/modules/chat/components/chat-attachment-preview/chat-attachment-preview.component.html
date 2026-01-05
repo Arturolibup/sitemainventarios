@@ -1,0 +1,25 @@
+<div *ngIf="files.length > 0" class="alert alert-secondary py-2 px-3 mb-2">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <span class="fw-semibold">
+      Adjuntos ({{ files.length }})
+    </span>
+  </div>
+  <div class="small">
+    <div
+      *ngFor="let file of files; let i = index"
+      class="d-flex justify-content-between align-items-center py-1"
+    >
+      <div class="text-truncate">
+        <i class="bi bi-paperclip me-1"></i>
+        {{ file.name }}
+      </div>
+      <button
+        type="button"
+        class="btn btn-sm btn-icon btn-light-danger ms-2"
+        (click)="onRemove(i)"
+      >
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+.card-custom {
+  border-radius: 0.475rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-control, .form-select {
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+}
+.btn-primary {
+  background-color: #009ef7;
+  border-color: #009ef7;
+  &:hover {
+    background-color: #007dc1;
+    border-color: #007dc1;
+  }
+}
+.btn-light-primary {
+  background-color: #f1faff;
+  color: #009ef7;
+  &:hover {
+    background-color: #e1f0ff;
+  }
+}
+.text-danger {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.img-thumbnail {
+  border-radius: 0.375rem;
+  max-height: 100px;
+}
+.table {
+  margin-bottom: 0;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Contenedor de la tabla */
+.table-doc {
+  table-layout: fixed;  /* para que respeten los anchos del colgroup */
+}
+
+/* Documento con ellipsis */
+.doc-name {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Grid de fotos: se ve uniforme y compacto */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.photo-tile {
+  text-align: center;
+}
+
+.photo-thumb {
+  max-width: 70px;
+  max-height: 70px;
+  cursor: pointer;
+}
+
+/* Acciones en fila, con wrap y separación */
+.actions-wrap {
+  row-gap: 8px;
+}
+
+/* Ayuda a que los labels con input hidden no rompan el layout */
+.actions-wrap > label,
+.actions-wrap > button {
+  white-space: nowrap;
+}

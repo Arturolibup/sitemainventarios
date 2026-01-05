@@ -1,0 +1,51 @@
+/* Importa los estilos base de Metronic */
+@import "./assets/sass/style.scss";
+// Reemplaza el estilo anterior con la versión RTL si es necesario
+// @import "./assets/css/style.rtl";
+@import "./assets/sass/plugins.scss";
+// @import "./assets/css/style.rtl.css";
+@import "./assets/sass/style.angular.scss";
+
+/* Keenicons - Iconos personalizados de Metronic */
+@import "./assets/plugins/keenicons/duotone/style.css";
+@import "./assets/plugins/keenicons/outline/style.css";
+@import "./assets/plugins/keenicons/solid/style.css";
+
+/* Estilos para notificaciones (ngx-toastr) */
+@import 'ngx-toastr/toastr';
+// Bootstrap style toast (para alertas en Bootstrap 5)
+@import 'ngx-toastr/toastr-bs5-alert';
+
+/* Estilos personalizados para notificaciones */
+.toast-success {
+  background-color: #d4ffd4 !important;
+}
+.toast-error {
+  background-color: #FFEEF3 !important;
+}
+.toast-info {
+  background-color: #b6e4ff !important;
+}
+.toast-warning {
+  background-color: #ffe1b6 !important;
+}
+
+/* Sobrescribir align-items: start para corregir advertencia de autoprefixer */
+[class*="align-items-"] {
+  align-items: flex-start !important;
+}
+
+/* ======================================================
+   FIX DEFINITIVO Bootstrap Icons + Metronic + Angular
+   ====================================================== */
+
+.bi {
+  font-family: "bootstrap-icons" !important;
+  font-style: normal;
+  font-weight: normal !important;
+  speak-as: none;
+  display: inline-block;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,29 @@
+# =========================
+# Backend (Laravel) - appi-crm-erp
+# =========================
+/backend/appi-crm-erp/vendor/
+/backend/appi-crm-erp/.env
+/backend/appi-crm-erp/.env.*
+/backend/appi-crm-erp/storage/**
+/backend/appi-crm-erp/bootstrap/cache/**
+/backend/appi-crm-erp/public/storage
+/backend/appi-crm-erp/public/hot
+/backend/appi-crm-erp/public/build
+
+# =========================
+# Frontend (Angular) - admin_metronic_v8.2.1
+# =========================
+/frontend/admin_metronic_v8.2.1/node_modules/
+/frontend/admin_metronic_v8.2.1/dist/
+/frontend/admin_metronic_v8.2.1/.angular/
+/frontend/admin_metronic_v8.2.1/.cache/
+
+# =========================
+# General
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.fleet/
+*.log

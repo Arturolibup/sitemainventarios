@@ -1,0 +1,136 @@
+<div class="card" >
+    <!-- Card Header -->
+    <div class="card-header border-0 pt-6">
+      <!-- Card Title -->
+      <div class="card-title">
+        <!-- Search Input -->
+        <div class="d-flex align-items-center position-relative my-1 gap-3" style="position: relative;"> 
+          <i class="ki-duotone ki-magnifier fs-3"
+             style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #555;">
+            <span class="path1"></span><span class="path2"></span>
+          </i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" (keyup.enter)="listUnits()"
+            name="search" 
+            class="form-control form-control-solid w-350px ps-12" 
+            placeholder="Buscar Unidad"
+            style="padding-left: 40px; border: 1px solid #ccc; color: #000;"
+          />
+          <!-- Search Button -->
+          <button type="button" class="btn btn-primary" (click)="listUnits()">
+            Buscar
+            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+          </button>
+          <!-- Refresh Button -->
+          <button type="button" class="btn btn-primary" (click)="refreshunit()">
+            Refrescar
+          </button>
+        </div>
+      </div>
+  
+      <!-- Card Toolbar -->
+      <div class="card-toolbar">
+        <div class="d-flex justify-content-end">
+          <!-- Add Role Button -->
+          <button type="button" class="btn btn-primary" (click)="createunit()">
+            + Agregar Unidad
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Card Body -->
+    <div class="card-body pt-0">
+      <!-- Table -->
+      <div id="kt_customers_table_wrapper" class="dt-container dt-boostrap5 dt-empty-footer">
+        <div id= "" class="table-responsive"> 
+          <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable" id="kt_customers_table"
+            style = "width : 1199.5 px;">
+            <thead>
+              <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0" role="row">
+                
+                <th class="min-w-300px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan ="1"
+                  colspan ="1" aria label= "Customer name; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">NOMBRE DE LA UNIDAD</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-300px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="2" rowspan ="1"
+                  colspan ="1" aria label= "Customer description; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">DESCRIPCION</span>
+                <span class="dt-column-order"></span>
+                  
+                <th class="min-w-100px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="3" rowspan ="1"
+                  colspan ="1" aria label= "Customer state; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">ESTADO</span>
+                <span class="dt-column-order"></span>
+                
+                <th class="min-w-150px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="4" rowspan ="1"
+                  colspan ="1" aria label= "Customer created_at; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">FECHA DE REGISTRO</span>
+                <span class="dt-column-order"></span>
+
+
+                <th class="min-w-200px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="5" rowspan ="1"
+                  colspan ="1" aria label= "Customer acciones; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">ACCIONES</span>
+                <span class="dt-column-order"></span>
+                
+              </tr>
+            </thead> 
+            <tbody class="fw-semibold text-gray-600">
+              <!-- Loop through roles -->
+                <ng-container *ngFor="let UNIT of UNIT_FULL">
+                  <tr>
+                      <td class = "text-center"> {{UNIT.name}}</td>
+                      <td class = "text-center"> {{UNIT.description}}</td>
+                      <td class = "text-center">
+                        <span class="badge badge-light-success text-center" *ngIf="UNIT.state ==1">Activo</span>
+                        <span class="badge badge-light-danger text-center" *ngIf="UNIT.state ==2">Inactivo</span>
+                      </td>
+                      
+                      <td class = "text-center"> {{UNIT.created_at}}</td>
+                        
+
+                    <!-- Edit Button -->
+                    <td class="text-center">
+                      <a href="#" onclick="return false;" (click)="addtransform(UNIT)" 
+                      class="btn btn-icon btn-bg-light btn-active-light-primary btn-sm me-2" title="Transformar">
+                        <i class="ki-duotone ki-add-item text-gray-900 fs-2tx">
+                          <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                        </i>
+                       
+                      
+                      </a>
+                      <a href="#" onclick="return false;" (click)="editunit(UNIT)" 
+                         class="btn btn-icon btn-bg-light btn-active-light-primary btn-sm me-2" title="Editar">
+                          <i class="ki-duotone ki-pencil fs-2">
+                              <span class="path1"></span><span class="path2"></span>
+                          </i>
+                      </a>
+                      <a href="#" onclick="return false;" (click)="deleteunit(UNIT)"  
+                         class="btn btn-icon btn-bg-light btn-active-light-primary btn-sm me-2" title="Borrar">
+                          <i class="ki-duotone ki-trash fs-2">
+                              <span class="path1"></span><span class="path2"></span>
+                              <span class="path3"></span><span class="path4"></span>
+                              <span class="path5"></span>
+                          </i>
+                      </a>
+                  </td>
+                  </tr>
+                </ng-container> 
+              </tbody>
+          </table>
+        </div>
+      <!-- Pagination -->
+      <ngb-pagination 
+        [collectionSize]="totalPages" 
+        [(page)]="currentPage" 
+        [pageSize]="25" 
+        [rotate]="true" 
+        [boundaryLinks]="true" 
+        (pageChange)="loadPage($event)">
+      </ngb-pagination>
+    </div>
+  </div>
+  

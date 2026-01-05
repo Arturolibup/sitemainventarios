@@ -1,0 +1,168 @@
+/* ============================================================
+   🧠 CHAT IA – CSS FINAL LISTO PARA PRODUCCIÓN
+   Corrige burbujas invisibles, texto oculto, HTML del backend
+   ============================================================ */
+
+.ai-chat-wrapper {
+  max-height: 600px;
+  border-radius: 12px;
+
+  .chat-body {
+    background: var(--bs-light);
+  }
+}
+
+.message-row {
+  display: flex;
+  width: 100%;
+}
+
+/* =======================
+   AVATARES (IA / USUARIO)
+   ======================= */
+.avatar-container {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-ia {
+  background: #e1f0ff;
+  color: #0056b3;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+
+.avatar-user {
+  background: #cfe5ff;
+  color: #003f88;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+
+/* ================
+   BURBUJAS
+   ================ */
+.bubble {
+  max-width: 75%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  line-height: 1.4;
+  font-size: 0.95rem;
+  position: relative;
+
+  .timestamp {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 4px;
+    display: block;
+  }
+}
+
+.bubble-user {
+  background: #0d6efd;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble-ia {
+  background: white;
+  border: 1px solid #e9ecef;
+  color: #2b2b2b;
+  border-bottom-left-radius: 4px;
+}
+
+/* PRE ETIQUETAS */
+.bubble-ia pre {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+
+/* ESCRIBIENDO */
+.typing-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.typing-bubble {
+  width: 60px;
+  text-align: center;
+}
+
+.typing-dots {
+  display: flex;
+  justify-content: space-between;
+  width: 26px;
+  margin: auto;
+
+  span {
+    width: 6px;
+    height: 6px;
+    background: #9ec5fe;
+    border-radius: 50%;
+    animation: typing 1.2s infinite ease-in-out;
+  }
+  span:nth-child(2) { animation-delay: 0.2s; }
+  span:nth-child(3) { animation-delay: 0.4s; }
+}
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* SUGERENCIAS */
+.suggestions-box {
+  position: absolute;
+  bottom: 58px;
+  left: 0;
+  right: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 2000;
+  border-radius: 10px;
+}
+
+/* ===========================================================
+   FIX HTML DEL BACKEND – RESPUESTAS OPENAI
+   =========================================================== */
+.bubble-ia .msg-html {
+  all: unset !important;
+  display: block !important;
+  white-space: normal !important;
+  color: #1a1a1a !important;
+  font-size: 0.95rem !important;
+  line-height: 1.38rem !important;
+}
+
+.bubble-ia .msg-html * {
+  all: revert !important;
+  color: #1a1a1a !important;
+  font-size: 0.95rem !important;
+  line-height: 1.38rem !important;
+}
+
+/* Tarjetas / DIVs del backend */
+.bubble-ia .msg-html > div {
+  padding: 12px !important;
+  background: #fff !important;
+  border: 1px solid #ddd !important;
+  border-radius: 10px !important;
+  margin: 6px 0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}

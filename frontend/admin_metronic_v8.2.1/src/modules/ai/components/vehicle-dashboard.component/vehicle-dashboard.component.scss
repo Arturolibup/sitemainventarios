@@ -1,0 +1,40 @@
+.vehicle-dashboard-wrapper {
+  .card-kpi {
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+
+    .card-body {
+      padding: 1.25rem 1.5rem;
+    }
+  }
+
+  .chart-container {
+    position: relative;
+    height: 260px;
+  }
+
+  .ia-panel {
+    max-height: 260px;
+  }
+}
+
+.analysis-wrapper {
+  background: #f8f9fa;        /* gris claro tipo Metronic */
+  border: 1px solid #e1e3ea;
+  padding: 15px;
+  border-radius: 8px;
+  max-height: 300px;          /* altura fija elegante */
+  overflow-y: auto;           /* SCROLL VERTICAL */
+  white-space: pre-wrap;      /* respeta saltos de línea */
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #3f4254 !important;  /* texto oscuro, súper legible */
+}
+
+.analysis-wrapper pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: "Inter", sans-serif;
+}
+

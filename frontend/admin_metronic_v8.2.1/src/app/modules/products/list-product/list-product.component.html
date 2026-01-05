@@ -1,0 +1,162 @@
+<div class="card">
+  <!-- Card Header -->
+  <div class="card-header border-0 pt-6">
+    <div class="row w-100 align-items-center">
+      <!-- Sección de búsqueda, categoría y botones -->
+      <div class="col-9 d-flex align-items-center gap-3">
+        <!-- Buscador de Producto -->
+        <div class="flex-grow-1 position-relative">
+          <i class="ki-duotone ki-magnifier fs-3"
+             style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #555;">
+            <span class="path1"></span><span class="path2"></span>
+          </i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" 
+            (keyup.enter)="listproducts()"
+            name="search" 
+            class="form-control form-control-solid ps-12" 
+            placeholder="Buscar Producto - SKU - Clave"
+            style="padding-left: 40px; border: 1px solid #ccc; color: #000;"
+          />
+        </div>
+
+        <!-- Desplegable de Categoría -->
+        <div class="flex-grow-1">
+          <select class="form-select form-select-solid form-select-lg" 
+          [(ngModel)]="product_categorie_id" 
+          name="product_categorie_id" 
+          (change)="listproducts()" required>
+            <option value="">Selecciona una categoría</option>
+            <ng-container *ngFor="let CATEGORI of CATEGORIES">
+              <option [value]="CATEGORI.id">{{CATEGORI.name}}</option>
+            </ng-container>
+          </select>
+          <!--<div class="text-muted fs-7 ms-1">Categoría</div>-->
+        </div>
+
+        <!-- Botones Buscar y Refrescar -->
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary" (click)="listproducts()">
+            Buscar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="refreshproducts()">
+            Refrescar
+          </button>
+        </div>
+      </div>
+
+      <!-- Botón Agregar Producto -->
+      <div class="col-3 d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" routerLink="/productos/registro">
+          + Agregar Producto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Body (sin cambios) -->
+  <!-- Card Body -->
+  <div class="card-body pt-0">
+    <div class="table-responsive">
+      <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_customers_table">
+        <thead>
+          <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+            <th class="min-w-150px">Producto</th>
+            <th class="min-w-125px">Categoría</th>
+            <th class="min-w-100px">Precio</th>
+            <th class="min-w-100px">Cantidad</th>
+            <th class="min-w-150px">Fecha de Registro</th>
+            <th class="min-w-100px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="fw-semibold text-gray-600">
+          <!-- Loading -->
+          <tr *ngIf="loading">
+            <td colspan="6" class="text-center py-8">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- No hay productos -->
+          <tr *ngIf="!loading && PRODUCTS.length === 0">
+            <td colspan="6" class="text-center py-8 text-muted">
+              <i class="ki-duotone ki-search-list fs-3x"></i>
+              <p class="mt-3">No se encontraron productos</p>
+            </td>
+          </tr>
+
+          <!-- Productos -->
+          <tr *ngFor="let PRODUCT of PRODUCTS">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="symbol symbol-50px me-5">
+                  <img 
+  *ngIf="PRODUCT?.imagen"
+  [src]="PRODUCT.imagen" 
+  alt="Producto"
+  class="object-fit-cover"
+  onerror="this.src='assets/media/svg/files/blank-image.svg'"
+>
+<img 
+  *ngIf="!PRODUCT?.imagen"
+  src="assets/media/svg/files/blank-image.svg"
+  alt="Sin imagen"
+  class="object-fit-cover"
+/>
+                </div>
+                <div>
+                  <a [routerLink]="['/productos/list/editar', PRODUCT.id]" 
+                     class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">
+                    {{ PRODUCT.title }}
+                  </a>
+                  <span class="text-muted fw-semibold d-block fs-7">{{ PRODUCT.sku }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ PRODUCT?.product_categorie?.name || 'Sin categoría' }}</td>
+            <td>{{ (+PRODUCT.price_general).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+            <td class="text-center">
+              <!--{{ PRODUCT.warehouses?.[0]?.quantity ? (+PRODUCT.warehouses[0].quantity).toLocaleString() : '0' }}-->
+               {{ getProductQuantity(PRODUCT) }}
+            </td>
+            <td>{{ PRODUCT.created_at | date:'short' }}</td>
+                <td>
+                  <a [routerLink]="'/productos/list/editar/'+PRODUCT.id" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                    <i class="ki-duotone ki-pencil fs-2">
+                      <span class="path1"></span><span class="path2"></span>
+                    </i>
+                  </a>
+                  <a href="#" onclick="return false;" (click)="deleteproduct(PRODUCT)" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                    <i class="ki-duotone ki-trash fs-2">
+                      <span class="path1"></span><span class="path2"></span>
+                      <span class="path3"></span><span class="path4"></span>
+                      <span class="path5"></span>
+                    </i>
+                  </a>
+                </td>
+              </tr>
+            
+          </tbody>
+          <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap mt-5">
+      <div class="fs-6 fw-semibold text-gray-700">
+        Mostrando {{ PRODUCTS.length }} de {{ totalRecords }} productos
+      </div>
+      <ngb-pagination 
+        [collectionSize]="totalRecords" 
+        [(page)]="currentPage" 
+        [pageSize]="pageSize" 
+        [maxSize]="5"
+        [rotate]="true"
+        [boundaryLinks]="true"
+        (pageChange)="loadPage($event)">
+      </ngb-pagination>
+    </div>
+  </div>
+</div>

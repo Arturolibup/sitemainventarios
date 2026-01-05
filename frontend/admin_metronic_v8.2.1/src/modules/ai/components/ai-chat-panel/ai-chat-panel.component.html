@@ -1,0 +1,103 @@
+<div class="card shadow-lg border-0 h-100 d-flex flex-column ai-chat-wrapper">
+
+  <!-- HEADER -->
+  <div class="card-header bg-primary text-white py-3 px-4 d-flex justify-content-between align-items-center">
+    <h6 class="mb-0 fw-bold d-flex align-items-center">
+      <i class="fas fa-robot me-2"></i> Asistente Inteligente
+    </h6>
+
+    <button class="btn btn-sm btn-outline-light" (click)="clear()" [disabled]="messages.length === 0">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+
+  <!-- MENSAJES -->
+  <div class="card-body flex-grow-1 overflow-auto p-3 chat-body" #chatContainer>
+
+    <!-- MENSAJE INICIAL -->
+    <!-- MENSAJE INICIAL -->
+    <div *ngIf="messages.length === 0" class="text-center text-muted mt-5">
+      <i class="fas fa-robot fa-3x mb-3 text-primary opacity-75"></i>
+      <p class="mb-0">¡Hola! ¿Qué deseas analizar hoy en el almacén?</p>
+      <small class="text-muted">
+        Ejemplos: “productos en umbral de desabasto”, “gráfica de salidas del mes”, “productos sin movimiento”.
+      </small>
+    </div>
+
+    <!-- LISTA DE MENSAJES -->
+    <div *ngFor="let msg of messages" class="mb-4 message-row"
+         [ngClass]="{ 'msg-user': msg.isUser, 'msg-ia': !msg.isUser }">
+
+      <div class="d-flex align-items-end"
+           [ngClass]="msg.isUser ? 'flex-row-reverse' : 'flex-row'">
+
+        <!-- AVATAR -->
+        <div class="avatar-container" *ngIf="!msg.isUser">
+          <div class="avatar-ia">
+            <i class="fas fa-robot"></i>
+          </div>
+        </div>
+
+        <div class="avatar-container" *ngIf="msg.isUser">
+          <div class="avatar-user">
+            <i class="fas fa-user"></i>
+          </div>
+        </div>
+
+        <!-- BURBUJA -->
+        <div class="bubble shadow-sm"
+             [ngClass]="msg.isUser ? 'bubble-user' : 'bubble-ia'">
+          <div class="msg-html" [innerHTML]="safe(msg.text)"></div>
+          <small class="timestamp">{{ msg.timestamp | date:'HH:mm' }}</small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- IA ESTÁ ESCRIBIENDO -->
+    <div *ngIf="sending" class="typing-row">
+      <div class="avatar-container">
+        <div class="avatar-ia"><i class="fas fa-robot"></i></div>
+      </div>
+
+      <div class="bubble bubble-ia typing-bubble shadow-sm">
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="card-footer bg-white p-3 position-relative">
+
+    <!-- SUGERENCIAS INLINE -->
+    <div *ngIf="suggestions.length > 0"
+         class="suggestions-box bg-white border rounded-3 shadow-lg">
+      <button *ngFor="let sug of suggestions"
+              class="dropdown-item py-2 px-3"
+              (click)="selectSuggestion(sug)">
+        <span [innerHTML]="sug.highlight"></span>
+      </button>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-group input-group-sm">
+      <input type="text"
+             id="ai-chat-input"
+             [(ngModel)]="input"
+             (input)="onInput($event)"
+             (keyup.enter)="send()"
+             placeholder="Escribe aquí…"
+             class="form-control form-control-sm border-primary"
+             [disabled]="sending">
+
+      <button class="btn btn-primary btn-sm"
+              (click)="send()"
+              [disabled]="sending || !input.trim()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,266 @@
+<div class="card card-custom shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title mb-0">📑 Cargar Documento y Fotos</h3>
+    <div class="card-toolbar">
+      <button class="btn btn-sm btn-light-primary" (click)="goBack()" [disabled]="isLoading">
+        <i class="bi bi-arrow-left"></i> Regresar
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <!-- Resumen compacto -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <strong>Orden:</strong> {{ orderNumber || '---' }}
+      </div>
+      <div class="col-md-4">
+        <strong>Folio SF:</strong> {{ foliosf || '---' }}
+      </div>
+      <div class="col-md-4">
+      <div *ngIf="providerName" > Proveedor: <strong>{{ providerName }}</strong> </div>
+    </div>
+
+    <!-- Documentos Generados Automáticamente -->
+    <div class="mt-5" *ngIf="generatedDocs.length > 0">
+      <h4 class="mb-4">📄 Documentos Generados Automáticamente</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 60%;">Documento</th>
+              <th style="width: 40%;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of generatedDocs">
+              <td>
+                <div class="d-flex align-items-center">
+                  <i [class]="getFileIcon(doc.path)" class="fs-3 me-3"></i>
+                  <div>
+                    <a (click)="downloadFile(getFullPhotoUrl(doc.path))" 
+                      class="text-primary cursor-pointer fw-bold">
+                      {{ doc.name }}
+                    </a>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-2" 
+                        (click)="downloadFile(getFullPhotoUrl(doc.path))">
+                  <i class="bi bi-eye me-1"></i> Ver
+                </button>
+                <button class="btn btn-sm btn-outline-success" 
+                        (click)="downloadFile(getFullPhotoUrl(doc.path))">
+                  <i class="bi bi-download me-1"></i> Descargar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- Formulario para subir UN documento y MÚLTIPLES fotos -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      
+      <!-- Documento único -->
+      <div class="form-group mb-4">
+        <label class="form-label">Documento (PDF, Word, Excel, etc.)</label>
+        <input type="file" 
+               accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" 
+               (change)="onFileChange($event, 'invoice')" 
+               class="form-control"
+               [class.is-invalid]="!currentInvoiceFile && form.touched">
+        <small class="form-text text-muted">Seleccione un documento. Límite: 5MB</small>
+        
+        <div *ngIf="currentInvoiceFile" class="alert alert-info mt-2 py-2">
+          <i [class]="getFileIcon(currentInvoiceFile.name)" class="me-2"></i>
+          <strong>Documento seleccionado:</strong> {{ currentInvoiceFile.name }}
+          <small class="text-muted ms-2">({{ (currentInvoiceFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
+        </div>
+      </div>
+
+      <!-- Múltiples fotos -->
+      <div class="form-group mb-4">
+        <label class="form-label">Fotos del Documento</label>
+        <input type="file" 
+               accept="image/*" 
+               multiple 
+               (change)="onFileChange($event, 'photos')" 
+               class="form-control">
+        <small class="form-text text-muted">Seleccione una o más fotos. Se comprimirán automáticamente</small>
+        
+        <div *ngIf="currentPhotos.length > 0" class="alert alert-info mt-2 py-2">
+          <strong>Fotos seleccionadas:</strong> {{ currentPhotos.length }} foto(s)
+          <div *ngFor="let photo of currentPhotos" class="small mt-1">
+            • {{ photo.name }} ({{ (photo.size / 1024).toFixed(0) }} KB)
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="!currentInvoiceFile || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+        <i class="bi bi-upload me-2"></i>Subir Documento y Fotos
+      </button>
+
+      <button type="button" class="btn btn-outline-secondary ms-2" 
+              (click)="resetCurrentFiles()" 
+              [disabled]="!currentInvoiceFile && currentPhotos.length === 0">
+        <i class="bi bi-x-circle me-2"></i>Limpiar
+      </button>
+    </form>
+
+    <!-- Lista de documentos cargados -->
+    <div class="mt-5" *ngIf="invoices.length > 0">
+      <h4 class="mb-4">📂 Documentos Cargados</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 25%; min-width: 200px;">Documento</th>
+              <th style="width: 45%;">Fotos</th>
+              <th style="width: 30%; min-width: 250px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let invoice of invoices">
+              
+              <!-- Columna Documento -->
+              <td>
+                <ng-container *ngIf="invoice.file_path; else noDoc">
+                  <div class="d-flex align-items-center">
+                    <i [class]="getFileIcon(invoice.file_path)" class="fs-3 me-3"></i>
+                    <div>
+                      <a (click)="downloadFile(invoice.file_path)" 
+                         class="text-primary cursor-pointer d-block fw-bold">
+                        {{ getFileName(invoice.file_path) }}
+                      </a>
+                      <small class="text-muted">
+                        {{ invoice.created_at | date:'dd/MM/yyyy HH:mm' }}
+                      </small>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-template #noDoc>
+                  <span class="text-muted">— Sin documento —</span>
+                </ng-template>
+              </td>
+
+              <!-- Columna Fotos -->
+              <td>
+                <div class="d-flex flex-wrap align-items-center">
+                  <div *ngFor="let photo of invoice.photos; let i = index" 
+                       class="me-2 mb-2 text-center position-relative">
+                     
+                    <img [src]="getFullPhotoUrl(photo)" class="img-thumbnail"
+                        style="width: 60px; height: 60px; cursor: pointer; object-fit: cover"
+                        (click)="openPhotosModal(invoice, i)"
+                        [title]="'Foto ' + (i + 1)">
+                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0"
+                            style="width: 20px; height: 20px; font-size: 10px;"
+                            (click)="deleteOnePhoto(invoice, photo)">
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div *ngIf="invoice.photos.length === 0" class="text-muted">
+                    Sin fotos
+                  </div>
+                </div>
+              </td>
+
+              <!-- Columna Acciones -->
+              <td>
+                <div class="d-grid gap-2">
+                  
+                  <!-- Reemplazar Documento -->
+                  <label class="btn btn-sm btn-outline-primary text-start">
+                    <i class="bi bi-arrow-repeat me-1"></i> Reemplazar Doc
+                    <input type="file" 
+                           accept=".pdf,.doc,.docx,.xls,.xlsx" 
+                           hidden
+                           (change)="onReplaceDocChange($event, invoice)">
+                  </label>
+
+                  <!-- Agregar Más Fotos -->
+                  <label class="btn btn-sm btn-outline-success text-start">
+                    <i class="bi bi-plus-circle me-1"></i> Agregar Fotos
+                    <input type="file" 
+                           accept="image/*" 
+                           multiple 
+                           hidden
+                           (change)="onAddPhotosChange($event, invoice)">
+                  </label>
+
+                  <!-- Ver Todas las Fotos -->
+                  <button class="btn btn-sm btn-outline-info text-start"
+                          (click)="openPhotosModal(invoice, 0)"
+                          [disabled]="invoice.photos.length === 0">
+                    <i class="bi bi-images me-1"></i> Ver Fotos ({{ invoice.photos.length }})
+                  </button>
+
+                  <!-- Eliminar Solo Documento -->
+                  <button class="btn btn-sm btn-outline-warning text-start"
+                          (click)="deleteOnlyDocument(invoice)">
+                    <i class="bi bi-file-earmark-x me-1"></i> Borrar Solo Doc
+                  </button>
+
+                  <!-- Eliminar Todo -->
+                  <button class="btn btn-sm btn-outline-danger text-start"
+                          (click)="deleteInvoice(invoice.id)" 
+                          [disabled]="isLoading">
+                    <i class="bi bi-trash me-1"></i> Eliminar Todo
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Galería de Fotos -->
+<div *ngIf="showPhotosModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Galería de Fotos</h5>
+        <button type="button" class="btn-close" (click)="closePhotosModal()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div *ngIf="currentPhotosUrls.length; else sinFotos">
+          <img [src]="currentPhotosUrls[currentPhotoIndex]" 
+               class="img-fluid rounded shadow" 
+               style="max-height: 60vh; max-width: 100%;">
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <button class="btn btn-outline-primary" (click)="prevPhoto()">
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <span class="fw-bold">{{ currentPhotoIndex + 1 }} / {{ currentPhotosUrls.length }}</span>
+            <button class="btn btn-outline-primary" (click)="nextPhoto()">
+              Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <ng-template #sinFotos>
+          <div class="text-muted py-5">
+            <i class="bi bi-image fs-1"></i>
+            <p class="mt-2">No hay fotos para mostrar</p>
+          </div>
+        </ng-template>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="downloadCurrentPhoto()" 
+                [disabled]="!currentPhotosUrls.length">
+          <i class="bi bi-download me-1"></i> Descargar Foto
+        </button>
+        <button class="btn btn-secondary" (click)="closePhotosModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

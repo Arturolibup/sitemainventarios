@@ -1,0 +1,197 @@
+<div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100 d-flex flex-column">
+  <div class="card-header bg-white border-bottom px-6 py-5">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="card-title mb-2">
+        <i class="fas fa-robot text-primary fs-2 me-3"></i>
+        <span class="fw-bold text-dark fs-3">Informe Ejecutivo IA - Análisis predictivo en tiempo real</span> 
+        <span></span>
+      </h3>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm btn-hover-rise shadow-sm" (click)="loadReport()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i> 
+          {{ loading ? 'Analizando...' : 'Actualizar Análisis' }}
+        </button>
+      
+      
+        <button class="btn btn-sm btn-light-danger" (click)="clearFilters()" [disabled]="loading">
+          <i class="fas fa-sync-alt me-2"></i> Limpiar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-6 flex-grow-1 overflow-auto">
+    <form [formGroup]="filtersForm" class="row g-4 mb-6">
+      <!-- SUBÁREA -->
+      <div class="col-lg-3 position-relative">
+        <label class="form-label text-muted fw-bold">Subárea</label>
+        <input type="text" class="form-control form-control-solid" 
+               placeholder="Buscar subárea..." 
+               (input)="searchSubarea($event)" autocomplete="off">
+        <div *ngIf="subareasSearch.length" 
+             class="position-absolute top-100 start-0 w-100 bg-white shadow-lg border rounded-3 mt-1" 
+             style="z-index: 1050; max-height: 280px; overflow-y: auto;">
+          <a *ngFor="let s of subareasSearch" 
+             class="dropdown-item py-3 border-bottom" 
+             (click)="selectSubarea(s)">
+            <strong>{{ s.name }}</strong>
+            <small class="text-muted d-block">{{ s.area.name || 'Sin área' }}</small>
+          </a>
+        </div>
+      </div>
+
+      <!-- PRODUCTO -->
+      <div class="col-lg-3 position-relative">
+        <label class="form-label text-muted fw-bold">Producto</label>
+        <input type="text" class="form-control form-control-solid" 
+               placeholder="Buscar producto..." 
+               (input)="searchProduct($event)" autocomplete="off">
+        <div *ngIf="productos.length" 
+             class="position-absolute top-100 start-0 w-100 bg-white shadow-lg border rounded-3 mt-1" 
+             style="z-index: 1050; max-height: 280px; overflow-y: auto;">
+          <a *ngFor="let p of productos" 
+             class="dropdown-item py-3 border-bottom" 
+             (click)="selectProduct(p)">
+            <div class="d-flex justify-content-between">
+              <span>{{ p.title }}</span>
+              <small class="text-muted">SKU: {{ p.sku }}</small>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- CATEGORÍA -->
+      <div class="col-lg-2">
+        <label class="form-label text-muted fw-bold">Categoría</label>
+        <select class="form-select form-select-solid" formControlName="categoria_id">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let c of categorias" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <!-- PARTIDA -->
+      <div class="col-lg-2 position-relative">
+        <label class="form-label text-muted fw-bold">Partida</label>
+        <input type="text" class="form-control form-control-solid" 
+               placeholder="Buscar partida..." 
+               (input)="searchPartida($event)" autocomplete="off">
+        <div *ngIf="partidas.length" 
+             class="position-absolute top-100 start-0 w-100 bg-white shadow-lg border rounded-3 mt-1" 
+             style="z-index: 1050; max-height: 280px; overflow-y: auto;">
+          <a *ngFor="let p of partidas" 
+             class="dropdown-item py-3 border-bottom" 
+             (click)="selectPartida(p)">
+            {{ p.name || p.descripcion || 'Partida ' + p.id }}
+          </a>
+        </div>
+      </div>
+
+      <!-- FECHA INICIO -->
+      <div class="col-lg-2">
+        <label class="form-label text-muted fw-bold">Desde</label>
+        <input type="month" class="form-control form-control-solid" formControlName="fecha_inicio">
+      </div>
+    </form>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="text-center py-20">
+      <div class="spinner-border text-primary" style="width: 5rem; height: 5rem;"></div>
+      <p class="mt-6 fs-3 text-muted fw-bold">La IA está analizando tus datos...</p>
+    </div>
+
+    <!-- REPORTE (SIN *ngIf en el canvas) -->
+    <div *ngIf="!loading && report">
+      <!-- RESUMEN -->
+      <div class="alert alert-primary border border-primary mb-7">
+        <div class="d-flex align-items-start gap-4">
+          <i class="fas fa-brain text-primary fs-1"></i>
+          <div>
+            <h4 class="text-primary fw-bold">Resumen Ejecutivo IA</h4>
+            <p class="mb-3 fs-6" [innerHTML]="report.narrativa_global"></p>
+            <div class="d-flex gap-3 flex-wrap">
+              <div *ngIf="report?.recomendacion_compra" class="mt-4 alert alert-success border-success">
+                <div class="d-flex align-items-start gap-3">
+                  <i class="fas fa-shopping-cart fs-3 text-success mt-1"></i>
+                  <div>
+                    <h5 class="mb-1">Recomendación de compra IA</h5>
+                    <p class="mb-1">
+                      <strong>Cantidad sugerida:</strong>
+                      {{ report.recomendacion_compra?.cantidad_sugerida | number:'1.0-0' }}
+                    </p>
+                    <p class="mb-1">
+                      <strong>Mes recomendado:</strong>
+                      {{ report.recomendacion_compra?.mes_recomendado || 'No especificado' }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                      {{ report.recomendacion_compra?.motivo }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <span class="badge bg-success fs-7">
+                Precisión: {{ (report.confianza ?? 0.92) * 100 | number:'1.0-0' }}%
+              </span>
+              <span class="badge bg-light text-muted border fs-7">
+                {{ report.generated_at | date:'dd MMM yyyy, HH:mm' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICA SIEMPRE EN EL DOM -->
+      <div class="card shadow-sm border-0 mb-7">
+        <div class="card-header bg-gradient-primary text-white py-4">
+          <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Proyección de Consumo</h5>
+        </div>
+        <div class="card-body p-6">
+          <div class="position-relative" style="height: 380px;">
+            <!-- CANVAS SIEMPRE EXISTE -->
+            <canvas #forecastChart id="forecastChart" height="380"></canvas>
+
+            <!-- MENSAJE SI NO HAY DATOS -->
+            <div *ngIf="!report?.historico_consumo?.length" 
+                class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+              <i class="fas fa-chart-line fa-3x mb-3 opacity-50"></i>
+              <p class="fw-bold">No hay datos históricos</p>
+            </div>
+
+            <!-- SPINNER -->
+            <div *ngIf="loading" class="d-flex align-items-center justify-content-center h-100">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div *ngIf="report.insights.length" class="mt-7">
+        <h5 class="fw-bold text-danger mb-4">
+          <i class="fas fa-exclamation-triangle me-2"></i> Alertas Detectadas por IA
+        </h5>
+        <div class="list-group">
+          <div *ngFor="let i of report.insights" class="list-group-item border-start border-4 border-danger bg-light-danger">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <span class="badge me-3" [ngClass]="getSeverityBadge(i.severity)">
+                  {{ getSeverityText(i.severity) }}
+                </span>
+                <strong class="d-block mb-1">{{ i.type || 'Alerta' }}</strong>
+                <p class="text-muted small mb-0">{{ i.summary }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIN REPORTE -->
+    <div *ngIf="!loading && !report" class="text-center py-20">
+      <i class="fas fa-robot fa-5x text-muted mb-4"></i>
+      <h4 class="text-muted">Selecciona filtros para generar el análisis</h4>
+      <p class="text-muted">La IA está lista para ayudarte</p>
+    </div>
+  </div>
+</div>

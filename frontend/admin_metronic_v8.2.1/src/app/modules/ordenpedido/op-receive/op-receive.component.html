@@ -1,0 +1,168 @@
+
+<div class="d-flex flex-column flex-root">
+  <div class="content d-flex flex-column flex-column-fluid">
+    <div class="d-flex flex-column-fluid">
+      <div class="container-fluid">
+        <div class="card card-custom">
+          <div class="card-header">
+            <div class="card-title">
+              <h3 class="card-label mb-0">Recepción de Orden de Pedido en Almacén</h3>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <form [formGroup]="orderForm">
+              <!-- Encabezado -->
+              <div class="row mb-6">
+                <div class="col-md-3">
+                  <label>Folio SF</label>
+                  <input class="form-control text-center" formControlName="foliosf" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label>Núm. de Orden</label>
+                  <input class="form-control text-center" formControlName="order_number" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label>Fecha</label>
+                  <input class="form-control text-center" formControlName="date" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label>Fecha Límite</label>
+                  <input class="form-control text-center" formControlName="date_limited" readonly>
+                </div>
+              </div>
+              
+              <div class="row mb-6">
+                <div class="col-md-6">
+                  <label>Área</label>
+                  <input class="form-control" formControlName="requester_area_name" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label>Subárea</label>
+                  <input class="form-control" formControlName="requester_subarea_name" readonly>
+                </div>
+              </div>
+              
+              <div class="row mb-6">
+                <div class="col-md-6">
+                  <label>Proveedor</label>
+                  <input class="form-control" formControlName="provider_name" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label>Lugar de entrega</label>
+                  <input class="form-control" formControlName="delivery_place" readonly>
+                </div>
+              </div>
+              <!-- DEBUG UI 
+              <div class="alert alert-info mb-4">
+                productsFormArray.length: {{ productsFormArray.length }}
+              </div>
+              <pre class="p-3 bg-light border" style="font-size: 12px;">
+                {{ productsFormArray.getRawValue() | json }}
+              </pre>-->
+              <!-- Tabla de productos -->
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr class="text-center bg-light">
+                      <th>Descripción</th>
+                      <th>Unidad</th>
+                      <th>Cantidad</th>
+                      <th>Marca</th>
+                      <!--<th>Importe</th>-->
+
+                      <!-- automotriz solo si REFACCIONES -->
+                      <ng-container *ngIf="(orderForm.get('format_type')?.value || format_type) === 'REFACCIONES'">
+                        <th>Placa</th>
+                        <th>Marca</th>
+                        <th>Tipo</th>
+                        <th>Modelo</th>
+                        <th>Cilindro</th>
+                      </ng-container>
+
+                      <th>Recibido</th>
+                      <th>Validar</th>
+                      <!--<th style="width: 16%;">Observaciones</th>-->
+                    </tr>
+                  </thead>
+
+                  <tbody formArrayName="products">
+                    <tr *ngFor="let g of productsFormArray.controls; let i = index; trackBy: trackByProduct"
+                        [formGroupName]="i"
+                        [class.is-invalid-row]="g.get('received_quantity')?.hasError('invalidReceivedQuantity')">
+
+                      <td><input class="form-control input-description" formControlName="description" readonly></td>
+                      <td><input class="form-control input-nombre" formControlName="unit_nombre" readonly></td>
+                      <td><input class="form-control input-quantity text-right" formControlName="quantity" readonly></td>
+                      <td><input class="form-control input-brand text-right" formControlName="brand" readonly></td>
+                      <!--<td><input class="form-control input-importe text-right" formControlName="amount" readonly></td>-->
+
+                      <ng-container *ngIf="(orderForm.get('format_type')?.value || format_type) === 'REFACCIONES'">
+                      <td><input class="form-control input-placa" formControlName="placa" readonly></td>
+                      <td><input class="form-control input-marca" formControlName="marca_nombre" readonly></td>
+                      <td><input class="form-control input-tipo" formControlName="tipo_nombre" readonly></td>
+                      <td><input class="form-control input-modelo text-right" formControlName="modelo" readonly></td>
+                      <td><input class="form-control input-cilindro text-right" formControlName="cilindro" readonly></td>
+                    </ng-container>
+
+                      <td>
+                        <input
+                          type="number"
+                          class="form-control text-center"
+                          formControlName="received_quantity"
+                          (input)="validateReceivedQuantity(i)">
+                        <div class="text-danger mt-1"
+                             *ngIf="g.get('received_quantity')?.hasError('invalidReceivedQuantity')">
+                          Recibido inválido (0 a Cantidad)
+                        </div>
+                      </td>
+                      <td class="text-center align-middle">
+                        <div class="d-flex justify-content-center align-items-center" style="height: 70%;">
+                          <input type="checkbox" formControlName="is_delivered" class="checkbox-xl">
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr *ngIf="!isLoading && productsFormArray.length === 0">
+                      <td [attr.colspan]="(orderForm.get('format_type')?.value || format_type) === 'REFACCIONES' ? 13 : 8"
+                          class="text-center py-10">
+                        No hay productos en esta orden
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Observaciones generales -->
+              <div class="form-group mt-6">
+                <label>Observaciones generales</label>
+                <textarea class="form-control" rows="3" formControlName="general_observations"></textarea>
+              </div>
+
+              <!-- Acciones -->
+              <div class="d-flex justify-content-end mt-6">
+                <button class="btn btn-secondary mr-3" (click)="cancel()">Cancelar</button>
+                <button class="btn btn-primary" [disabled]="isLoading" (click)="submit()">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2"></span>
+                  Guardar recepción
+                </button>
+              </div>
+
+              <div *ngIf="isLoading" class="text-center py-10">
+                <span class="spinner-border"></span>
+                <div class="mt-2">Procesando...</div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <style>
+          .is-invalid-row td { background: #fff3f3 !important; }
+        </style>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+

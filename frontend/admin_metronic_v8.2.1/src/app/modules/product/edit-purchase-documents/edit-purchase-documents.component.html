@@ -1,0 +1,98 @@
+<div class="d-flex flex-column flex-column-fluid">
+  <!--begin::Toolbar-->
+  <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+    <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+      <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+        <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+          Editar Documento Oficial
+        </h1>
+      </div>
+    </div>
+  </div>
+  <!--end::Toolbar-->
+  <div *ngIf="isLoading$ | async" class="text-center">
+    <span class="spinner-border spinner-border-sm"></span> Cargando datos...
+  </div>
+  <!--begin::Content-->
+  <div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+      <form id="kt_edit_purchase_document_form" class="form d-flex flex-column gap-7">
+        <div class="card card-flush py-4">
+          <div class="card-header">
+            <h2 class="card-title fs-3">Documento Actual</h2>
+          </div>
+          <div class="card-body pt-0" *ngIf="isDocumentLoaded">
+            <!--<div>Debug: {{ document | json }}</div>-->
+            <div class="row g-5 mb-8">
+              <div class="col-md-6">
+                <label class="form-label">Nombre del Archivo</label>
+                <p style="font-size: 1.5rem;"> {{ document.original_name }}</p> <!-- Quitamos ?. y || 'N/A' -->
+              </div>
+              <div class="col-md-6">
+                <div style="text-align: center;"> 
+                <label class="form-label">Vista Previa</label>
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 200px;">
+                  <img *ngIf="isImageFile(document.file_type)" [src]="document.url" style="max-width: 200px; max-height: 200px;" alt="Vista previa" (error)="onImageError($event)">
+                  <button *ngIf="document.file_type && !isImageFile(document.file_type)" class="btn btn-sm btn-info" (click)="downloadCurrentDocument()">Descargar para ver</button>
+                  <span *ngIf="!document.file_type">No disponible</span>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!isDocumentLoaded">Cargando documento...</div>
+        </div>
+
+        <div class="card card-flush py-4">
+          <div class="card-header">
+            <h2 class="card-title fs-3">Reemplazar Documento</h2>
+          </div>
+          <div class="card-body pt-0">
+            <div class="mb-8">
+              <label class="form-label required">Subir Nuevo Documento (PDF, Imágenes)</label>
+              <input type="file" class="form-control" (change)="onFileChange($event)" accept=".pdf,.jpg,.jpeg,.png" required />
+            </div>
+            <div class="table-responsive" *ngIf="documentPreview">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Archivo</th>
+                    <th>Vista Previa</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ documentPreview.file.name }}</td>
+                    <td>
+                      <img *ngIf="documentPreview.file.type.includes('image')" [src]="documentPreview.url" style="max-width: 100px; max-height: 100px;" alt="Vista previa">
+                      <span *ngIf="!documentPreview.file.type.includes('image')">No hay vista previa disponible</span>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="removeDocument()">Eliminar</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <button type="button" class="btn btn-light" (click)="cancel()">Cancelar</button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="updateDocument()" 
+            [disabled]="!documentFile"
+          >
+            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+            <span class="indicator-label">Actualizar Documento</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!--end::Content-->
+</div>

@@ -1,0 +1,93 @@
+.card {
+  .card-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+.table {
+  th, td {
+    vertical-align: middle;
+    padding: 0.75rem;
+  }
+  th.cursor-pointer {
+    cursor: pointer;
+  }
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.btn i {
+  margin-right: 5px;
+}
+
+.badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+.pagination {
+  .page-link {
+    cursor: pointer;
+  }
+  .page-item.disabled .page-link {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+/* Botón sin estilos extra */
+.sem-btn-reset {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Círculo más grande (20px) con ligero borde */
+.sem-dot {
+  display: inline-block;
+  width: 20px;              /* aumentado */
+  height: 20px;             /* aumentado */
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,.08);
+  vertical-align: middle;
+  transition: filter .15s ease, box-shadow .15s ease;
+}
+
+/* Colores sólidos */
+.sem-yellow { background-color: #fbff00 !important; }
+.sem-orange { background-color: #32e622 !important; }
+.sem-green  { background-color: #929793 !important; }
+.sem-gray   { background-color: #ce222a !important; }
+
+/* Hover/focus sutil */
+.sem-btn-reset:focus .sem-dot { box-shadow: 0 0 0 4px rgba(13,110,253,.18); }
+.sem-btn-reset:hover .sem-dot { filter: brightness(.96); }
+
+/* Pulso suave solo cuando está en PARCIAL (naranja) */
+.sem-orange {
+  animation: sem-pulse 1.4s ease-in-out infinite;
+}
+
+/* Respeta preferencias de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .sem-orange { animation: none; }
+}
+
+/* Keyframes del pulso */
+@keyframes sem-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(230,126,34,.45); }
+  70%  { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(230,126,34,0); }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(230,126,34,0); }
+}

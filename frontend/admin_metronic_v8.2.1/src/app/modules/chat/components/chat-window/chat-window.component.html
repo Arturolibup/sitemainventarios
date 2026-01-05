@@ -1,0 +1,144 @@
+<div class="chat-window-root">
+
+  <!-- HEADER DEL CHAT -->
+  <div class="chat-header">
+    <div class="d-flex align-items-center">
+      <div class="symbol symbol-35px me-3">
+        <span class="symbol-label bg-light-primary text-primary fw-bold">
+          {{ getOtherParticipantName() | slice: 0:1 }}
+        </span>
+      </div>
+
+      <div class="fw-semibold">
+        {{ getOtherParticipantName() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- MENSAJES -->
+  <div class="chat-messages" #messagesContainer>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="loadingMessages && messages.length === 0" class="text-center text-muted">
+      <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+      <div>Cargando mensajes...</div>
+    </div>
+
+    <div *ngIf="!loadingMessages && messages.length === 0" class="text-center text-muted">
+      No hay mensajes aún. Escribe el primero.
+    </div>
+
+    <!-- MENSAJES -->
+    <div *ngFor="let msg of messages" class="mb-2">
+      <div
+        class="d-flex"
+        [ngClass]="{
+          'justify-content-end': isMine(msg),
+          'justify-content-start': !isMine(msg)
+        }"
+      >
+        <div
+          class="message-bubble"
+          [ngClass]="{
+            'mine bg-primary text-white': isMine(msg),
+            'theirs bg-white border': !isMine(msg)
+          }"
+        >
+          <div *ngIf="msg.body" class="mb-1">
+            {{ msg.body }}
+          </div>
+
+          <div *ngIf="msg.has_attachments">
+            <div *ngFor="let att of msg.attachments" class="small">
+              <i class="bi bi-paperclip me-1"></i>
+              <button
+                type="button"
+                class="btn btn-sm btn-link p-0 text-decoration-underline"
+                (click)="downloadAttachment(att)"
+              >
+                {{ att.original_name }}
+              </button>
+            </div>
+          </div>
+
+          <!-- TIME + CHECKS -->
+          <div class="d-flex justify-content-end align-items-center gap-1 small mt-1 opacity-75">
+            <span>{{ msg.sent_at | date: 'shortTime' }}</span>
+
+            <ng-container *ngIf="isMine(msg)">
+              <i
+                class="bi"
+                [ngClass]="{
+                  'bi-check': !msg.read_at,
+                  'bi-check-all text-primary': msg.read_at
+                }"
+              ></i>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✏️ BURBUJA ESCRIBIENDO (CORRECTA) -->
+    <div
+      *ngIf="getTypingText()"
+      class="d-flex justify-content-start mb-2"
+    >
+      <div class="typing-bubble">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INPUT -->
+  <div class="chat-input">
+
+    <app-chat-attachment-preview
+      [files]="attachments"
+      (remove)="onRemoveAttachment($event)"
+    ></app-chat-attachment-preview>
+
+    <div class="input-group">
+
+      <!-- 📎 ADJUNTAR -->
+      <button type="button" class="btn btn-icon btn-light">
+        <label class="mb-0 cursor-pointer d-flex align-items-center justify-content-center">
+          <i class="bi bi-paperclip fs-4"></i>
+          <input
+            type="file"
+            class="d-none"
+            multiple
+            (change)="onFileSelected($event)"
+          />
+        </label>
+      </button>
+
+      <textarea
+        #messageInput
+        class="form-control"
+        rows="2"
+        [(ngModel)]="body"
+        (keydown)="onKeydown($event)"
+        placeholder="Escribe un mensaje..."
+      ></textarea>
+
+      <!-- 📤 ENVIAR -->
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="sendMessage()"
+        [disabled]="sending || (!body.trim() && attachments.length === 0)"
+      >
+        <i *ngIf="!sending" class="bi bi-send fs-4"></i>
+        <span *ngIf="sending" class="spinner-border spinner-border-sm"></span>
+      </button>
+
+    </div>
+  </div>
+</div>

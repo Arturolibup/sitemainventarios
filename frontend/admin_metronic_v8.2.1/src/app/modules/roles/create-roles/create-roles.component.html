@@ -1,0 +1,109 @@
+<!--begin::Modal content-->
+<div class="modal-content">
+
+  <!-- Header -->
+<div class="modal-header border-0 pb-0">
+  <h2 class="fw-bolder text-gray-800">Crear Rol</h2>
+  
+  <!-- BOTÓN DE CIERRE ESTÁNDAR DE METRONIC (visible siempre) -->
+  <div class="btn btn-icon btn-sm btn-active-light-primary end-0 top-0 m-3" 
+       (click)="modal.dismiss()" 
+       data-kt-users-modal-action="close">
+    <i class="ki-duotone ki-cross fs-1">
+      <span class="path1"></span>
+      <span class="path2"></span>
+    </i>
+  </div>
+</div>
+
+  <!-- Body -->
+  <div class="modal-body mx-5 mx-xl-15 pt-5 pb-10">
+    <form class="form">
+
+      <!-- Nombre -->
+      <div class="fv-row mb-10">
+        <label class="required fw-bold fs-6 mb-2">Nombre del Rol</label>
+        <input
+          type="text"
+          class="form-control form-control-lg form-control-solid"
+          placeholder="Ej: Administrador"
+          [(ngModel)]="name"
+          name="name"
+        />
+      </div>
+    </form>
+
+      <!-- Permisos -->
+      <div class="fv-row mb-10">
+        <label class="required fw-bold fs-6 mb-5">Permisos por módulo</label>
+
+        <div ngbAccordion [animation]="false">
+
+          <div
+            ngbAccordionItem
+            *ngFor="let modulo of SIDEBAR; let i = index"
+            [collapsed]="true">
+
+            <!-- HEADER -->
+            <div ngbAccordionHeader>
+              <button ngbAccordionButton type="button" class="fw-bold w-100 text-start">
+                {{ modulo.name }}
+              </button>
+            </div>
+
+            <!-- BODY -->
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <div class="row">
+
+                  <div
+                    class="col-md-6 col-lg-4 mb-3"
+                    *ngFor="let sub of modulo.submenu">
+
+                    <div
+                      class="form-check form-check-custom form-check-solid p-3 rounded"
+                      [class.bg-light-primary]="isChecked(sub.permission_name)">
+
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [id]="'perm-create-' + sub.permission_name"
+                        [checked]="isChecked(sub.permission_name)"
+                        (change)="togglePermission(sub.permission_name)" />
+
+                      <label
+                        class="form-check-label fw-semibold"
+                        [for]="'perm-create-' + sub.permission_name">
+                        {{ sub.label }}
+                      </label>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="text-center pt-10">
+        <button type="button" class="btn btn-light me-3" (click)="modal.dismiss()">
+          Cancelar
+        </button>
+
+        <button type="button" class="btn btn-primary" [disabled]="isLoading" (click)="store()">
+          <span class="indicator-label">Crear Rol</span>
+          <span class="indicator-progress" *ngIf="isLoading">
+            Creando...
+            <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+          </span>
+        </button>
+      </div>
+
+
+  </div>
+</div>

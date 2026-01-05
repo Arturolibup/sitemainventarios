@@ -1,0 +1,344 @@
+<div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100 d-flex flex-column">
+  <!-- HEADER CON PESTAÑAS -->
+  <div class="card-header bg-white border-bottom px-6 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="card-title mb-0 text-primary fw-bold">
+        <i class="fas fa-robot text-primary me-3"></i>
+        Dashboard Inteligente IA
+      </h3>
+      <div class="d-flex gap-2">
+        <button *ngIf="!loading; else loadingBtn"
+                class="btn btn-outline-primary btn-sm btn-hover-rise shadow-sm"
+                (click)="loadGlobalReportWithRetry()">
+          <i class="fas fa-sync-alt me-2"></i> Actualizar
+        </button>
+        <button class="btn btn-outline-warning btn-sm" (click)="resetFilters()">
+          <i class="fas fa-eraser me-2"></i> Limpiar filtros
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+          <i class="fas fa-arrow-left me-2"></i> Regresar
+        </button>
+        <ng-template #loadingBtn>
+          <button class="btn btn-outline-primary btn-sm" disabled>
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Cargando...
+          </button>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- PESTAÑAS -->
+    <ul class="nav nav-tabs nav-line-tabs fs-6 border-0">
+      <li class="nav-item" (click)="setActiveTab('dashboard')">
+        <a class="nav-link" [ngClass]="{ 'active text-primary': activeTab === 'dashboard' }">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item" (click)="setActiveTab('insights')">
+        <a class="nav-link" [ngClass]="{ 'active text-warning': activeTab === 'insights' }">
+          <i class="fas fa-lightbulb me-2"></i> Insights
+        </a>
+      </li>
+      <li class="nav-item" (click)="setActiveTab('products')">
+        <a class="nav-link" [ngClass]="{ 'active text-success': activeTab === 'products' }">
+          <i class="fas fa-star me-2"></i> Productos
+        </a>
+      </li>
+      <li class="nav-item" (click)="setActiveTab('areas')">
+        <a class="nav-link" [ngClass]="{ 'active text-info': activeTab === 'areas' }">
+          <i class="fas fa-chart-bar me-2"></i> Áreas
+        </a>
+      </li>
+      <li class="nav-item" (click)="setActiveTab('vehicles')">
+        <a class="nav-link" [ngClass]="{ 'active text-danger': activeTab === 'vehicles' }">
+          <i class="fas fa-comment-dots me-2"></i> Vehiculos IA
+        </a>
+      </li>
+      <li class="nav-item" (click)="setActiveTab('chat')">
+        <a class="nav-link" [ngClass]="{ 'active text-danger': activeTab === 'chat' }">
+          <i class="fas fa-comment-dots me-2"></i> Chat IA
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card-body bg-light border-bottom px-6 py-4">
+    <form class="row g-3 align-items-end" #filtersForm="ngForm">
+      <div class="col-xl-2 col-md-3 col-sm-6">
+        <label class="form-label text-muted fs-7 fw-bold">Año</label>
+        <select class="form-select form-select-solid"
+                [(ngModel)]="filters.year"
+                name="year"
+                (change)="onFilterChange()">
+          <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+
+      <div class="col-xl-2 col-md-3 col-sm-6">
+        <label class="form-label text-muted fs-7 fw-bold">Área</label>
+        <select class="form-select form-select-solid"
+                [(ngModel)]="filters.area_id"
+                name="area_id"
+                (change)="onAreaChange($event)">
+          <option value="all">Todas</option>
+          <option *ngFor="let a of areas" [value]="a.id">{{ a.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-xl-2 col-md-3 col-sm-6">
+        <label class="form-label text-muted fs-7 fw-bold">Subárea</label>
+        <select class="form-select form-select-solid"
+                [(ngModel)]="filters.subarea_id"
+                name="subarea_id"
+                (change)="onFilterChange()">
+          <option value="all">Todas</option>
+          <option *ngFor="let s of subareas" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-xl-2 col-md-3 col-sm-6">
+        <label class="form-label text-muted fs-7 fw-bold">Categoría</label>
+        <select class="form-select form-select-solid"
+                [(ngModel)]="filters.category_id"
+                name="category_id"
+                (change)="loadProducts(); onFilterChange()">
+          <option value="all">Todas</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-xl-4 col-md-12">
+        <label class="form-label text-muted fs-7 fw-bold">Producto</label>
+        <div class="position-relative">
+          <input type="text"
+                 class="form-control form-control-solid ps-12"
+                 [(ngModel)]="filters.product_search"
+                 name="product_search"
+                 [ngModelOptions]="{standalone: true}"
+                 (input)="filterProducts(); onProductSelected($event)"
+                 placeholder="Buscar producto..."
+                 list="productsList"
+                 autocomplete="off">
+          <i class="fas fa-search position-absolute top-50 start-4 translate-middle-y text-muted"></i>
+          <datalist id="productsList">
+            <option *ngFor="let p of filteredProducts" [value]="p.title"></option>
+          </datalist>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="card-body flex-grow-1 overflow-auto p-0">
+    <div class="tab-content h-100">
+
+      <!-- TAB 1: DASHBOARD PRINCIPAL -->
+      <div class="tab-pane fade h-100" 
+           [ngClass]="{'show active': activeTab === 'dashboard'}">
+        <div class="p-6">
+          <ng-container *ngIf="!loading && hasDataToRender(); else loadingState">
+
+            <!-- GRÁFICAS -->
+            <div class="row g-6 mb-6">
+              <div class="col-lg-6">
+                <div class="card h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-header bg-white border-0 py-4">
+                    <h5 class="card-title mb-0 text-primary">
+                      <i class="fas fa-chart-line me-2"></i> Tendencia de Consumo
+                    </h5>
+                  </div>
+                  <div class="card-body p-4">
+                    <canvas id="chartForecast" height="300"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="card h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-header bg-white border-0 py-4">
+                    <h5 class="card-title mb-0 text-success">
+                      <i class="fas fa-chart-bar me-2"></i> Consumo por Área
+                    </h5>
+                  </div>
+                  <div class="card-body p-4">
+                    <canvas id="chartComparison" height="300"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ESTADÍSTICAS -->
+            <div class="row g-4 mb-6">
+              <div class="col-md-3" *ngIf="getTotalConsumption() > 0">
+                <div class="card bg-gradient-primary text-white h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 opacity-75">Consumo Total</h6>
+                      <h3 class="mb-0">{{ stats.totalConsumption | number }}</h3>
+                    </div>
+                    <i class="fas fa-boxes fs-2x opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3" *ngIf="getActiveAreasCount() > 0">
+                <div class="card bg-gradient-success text-white h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 opacity-75">Áreas Activas</h6>
+                      <h3 class="mb-0">{{ stats.activeAreas }}</h3>
+                    </div>
+                    <i class="fas fa-map-marker-alt fs-2x opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card bg-gradient-warning text-white h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 opacity-75">Próximo Mes</h6>
+                      <h3 class="mb-0">{{ getNextMonthForecast() | number }}</h3>
+                    </div>
+                    <i class="fas fa-calendar-alt fs-2x opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card bg-gradient-danger text-white h-100 shadow-sm border-0 rounded-3">
+                  <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 opacity-75">Tendencia</h6>
+                      <h3 class="mb-0">
+                        {{ stats.trendPercent }}
+                        <i class="fas ms-1" [ngClass]="getTrendIcon()" *ngIf="getTrendIcon()"></i>
+                      </h3>
+                    </div>
+                    <i class="fas fa-chart-trending-up fs-2x opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TOP 100 PRODUCTOS -->
+            <div class="card shadow-sm border-0 rounded-3">
+              <div class="card-header bg-white border-0 py-4 d-flex align-items-center justify-content-between">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                  <i class="fas fa-box-open me-2 text-primary"></i> Top 100 Productos más Consumidos
+                </h5>
+                <span class="badge bg-light text-muted border px-3 py-2">
+                  {{ data?.top_products?.length || 0 }} registros
+                </span>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light fw-bold text-muted">
+                      <tr>
+                        <th class="text-center" style="width: 5%;">#</th>
+                        <th style="width: 45%;">Producto</th>
+                        <th style="width: 30%;">Área</th>
+                        <th class="text-center" style="width: 20%;">Consumo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let p of data.top_products; let i = index">
+                        <td class="text-center fw-bold text-gray-700">{{ i + 1 }}</td>
+                        <td class="fw-semibold text-dark">
+                          <i class="fas fa-box text-primary me-2 opacity-75"></i>
+                          {{ p.producto || p.title }}
+                        </td>
+                        <td class="text-gray-700">
+                          <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                          {{ p.area || '—' }}
+                        </td>
+                        <td class="text-center fw-bold text-gray-800">
+                          {{ p.cantidad | number }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- TAB 2: INSIGHTS -->
+      <div class="tab-pane fade h-100" [ngClass]="{'show active': activeTab === 'insights'}">
+        <div class="p-6 h-100">
+          <app-ai-global-insights [filters]="globalFilters"></app-ai-global-insights>
+        </div>
+      </div>
+
+      <!-- TAB 3: PRODUCTOS CRÍTICOS -->
+      <div class="tab-pane fade h-100" [ngClass]="{'show active': activeTab === 'products'}">
+        <div class="p-6 h-100">
+          <app-ai-priority-products [filters]="globalFilters"></app-ai-priority-products>
+        </div>
+      </div>
+
+      <!-- TAB 4: COMPARACIÓN DE ÁREAS -->
+      <div class="tab-pane fade h-100" [ngClass]="{'show active': activeTab === 'areas'}">
+        <div class="p-6 h-100">
+          <app-ai-areas-comparison [filters]="globalFilters"></app-ai-areas-comparison>
+        </div>
+      </div>
+
+      <!-- TAB 5: CHAT IA -->
+      <div class="tab-pane fade h-100" [ngClass]="{'show active': activeTab === 'chat'}">
+        <div class="p-6 h-100 d-flex flex-column">
+          <app-ai-chat-panel [filters]="globalFilters"></app-ai-chat-panel>
+        </div>
+      </div>
+      <!-- TAB 6: vehiculos IA -->
+      <div class="tab-pane fade h-100" [ngClass]="{'show active': activeTab === 'vehicles'}">
+        <div class="p-6 h-100 d-flex flex-column">
+          <app-vehicle-dashboard></app-vehicle-dashboard>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ESTADO DE CARGA -->
+  <ng-template #loadingState>
+    <div class="text-center py-16 bg-white h-100 d-flex flex-column justify-content-center">
+      <div class="spinner-border text-primary mb-4" style="width: 4rem; height: 4rem;">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted fs-4 fw-bold">Analizando datos con IA...</p>
+      <div class="progress mt-4 mx-auto" style="height: 6px; width: 60%;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: 100%"></div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ERROR -->
+  <div *ngIf="error && !loading" class="alert alert-warning m-6 d-flex align-items-center">
+    <i class="fas fa-robot fs-2x me-3 text-warning"></i>
+    <div>
+      <strong class="d-block">IA no disponible</strong>
+      <p class="mb-1">{{ error }}</p>
+      <small class="text-muted">Datos locales activados.</small>
+    </div>
+  </div>
+</div>
+
+<!-- ESTILOS -->
+<style>
+  .btn-hover-rise { transition: all 0.3s ease; }
+  .btn-hover-rise:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important; }
+  .nav-tabs .nav-link {
+    border: none; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-weight: 600;
+  }
+  .nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #3699ff, #1e40af)!important;
+    color: white!important;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0,0,0,0.1)!important; }
+  .table { border-collapse: separate !important; border-spacing: 0 4px !important; }
+  .table-row:hover { background-color: #f9fafc !important; transform: scale(1.01); }
+  thead th { background: #f3f6f9 !important; border: none !important; font-size: 0.85rem; text-transform: uppercase; }
+  td { vertical-align: middle !important; font-size: 0.9rem; }
+</style>

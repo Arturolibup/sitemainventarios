@@ -1,0 +1,157 @@
+<div class="card" >
+    <!-- Card Header -->
+    <div class="card-header border-0 pt-6">
+      <!-- Card Title -->
+      <div class="card-title">
+        <!-- Search Input -->
+        <div class="d-flex align-items-center position-relative my-1 gap-3" style="position: relative;"> 
+          <i class="ki-duotone ki-magnifier fs-3"
+             style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #555;">
+            <span class="path1"></span><span class="path2"></span>
+          </i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" (keyup.enter)="listUsers()"
+            name="search" 
+            class="form-control form-control-solid w-350px ps-12" 
+            placeholder="Buscar User"
+            style="padding-left: 40px; border: 1px solid #ccc; color: #000;"
+          />
+          <!-- Search Button -->
+          <button type="button" class="btn btn-primary" (click)="listUsers()">
+            Buscar
+            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+          </button>
+          <!-- Refresh Button -->
+          <button type="button" class="btn btn-primary" (click)="refreshUser()">
+            Refrescar
+          </button>
+         
+          
+        </div>
+      </div>
+  
+      <!-- Card Toolbar -->
+      <div class="card-toolbar">
+        <div class="d-flex justify-content-end">
+          <!-- Add Role Button -->
+          <button type="button" class="btn btn-primary" (click)="createUser()">
+            + Agregar User
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Card Body -->
+    <div class="card-body pt-0">
+      <!-- Table -->
+      <div id="kt_customers_table_wrapper" class="dt-container dt-boostrap5 dt-empty-footer">
+        <div id= "" class="table-responsive"> 
+          <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable" id="kt_customers_table"
+            style = "width : 1199.5 px;">
+            <thead>
+              <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0" role="row">
+
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="1" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Usuario</span>
+                <span class="dt-column-order"></span>
+                  
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="2" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Rol</span>
+                <span class="dt-column-order"></span>
+                
+                <!--<th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="3" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Sucursal</span>
+                <span class="dt-column-order"></span> -->
+
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="4" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Telefono</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="5" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Identificación</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="6" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Fecha de Registro</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-colomn="7" rowspan ="1"
+                  colspan ="1" arial label= "Customer NAme; Activate to sort" tbindex= "0">
+                <span class=" dt-column-tittle" role="button">Acciones</span>
+                <span class="dt-column-order"></span>
+                
+              </tr>
+            </thead> 
+            <tbody class="fw-semibold text-gray-600">
+              <!-- Loop through roles -->
+                <ng-container *ngFor="let USER of USERS">
+                  <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="symbol symbol-50px me-5">
+                              <img [src]="USER?.avatar " alt="Avatar">
+
+                            </div>
+                            
+                            <div class="d-flex justify-content-start flex-column">
+                                <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{USER.full_name}}</a>
+                                <span class="text-muted fw-semibold text-muted d-block fs-7">{{USER.email}}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{USER.role.name}}</td>
+                    <!--<td>{{USER.sucursal_id}}</td> -->
+                      <!-- para que encaje la columna y se hagan renglones 
+                        <span style="width: 800px !important; display: block;"</span>> -->     
+                    <td> {{USER.phone}}</td>
+                    <td> {{USER.n_document}}</td>
+                    <td> {{USER.create_format_at}}</td>
+                    <td class=" ">
+                    <!-- Edit Button -->
+                      <a  href="#" onclick="return false;" (click)="editUser(USER)" 
+                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                        <i class="ki-duotone ki-pencil fs-2">
+                          <span class="path1"></span><span class="path2"></span>
+                        </i>
+                      </a>
+                      <!-- Delete Button -->
+                      <a href="#" onclick="return false;" (click)="deleteUser(USER)"  
+                        class="btn btn-icon btn-bg-light btn-active-color -primary btn-sm me">
+                        <i class="ki-duotone ki-trash fs-2">
+                          <span class="path1"></span><span class="path2"></span>
+                          <span class="path3"></span><span class="path4"></span>
+                          <span class="path5"></span> <!-- Ajuste para que el ícono del bote de basura aparezca bien -->
+                        </i>
+                      </a>
+                      <a href="#" onclick="return false;" (click)="openChat(USER)" 
+                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                        <i class="ki-duotone ki-message-text-2 fs-2">
+                          <span class="path1"></span><span class="path2"></span>
+                          <span class="path3"></span>
+                        </i>
+                      </a>
+                    </td>
+                  </tr>
+                </ng-container> 
+              </tbody>
+          </table>
+        </div>
+      <!-- Pagination -->
+      <ngb-pagination 
+        [collectionSize]="totalPages" 
+        [(page)]="currentPage" 
+        [pageSize]="25" 
+        [rotate]="true" 
+        [boundaryLinks]="true" 
+        (pageChange)="loadPage($event)">
+      </ngb-pagination>
+    </div>
+  </div>
+  

@@ -1,0 +1,330 @@
+<div class="card shadow-sm p-4 mb-5 rounded-3">
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <h4 class="fw-bold text-primary m-0">
+      <i class="fas fa-check-circle me-2"></i>Revisión y Aprobación de Requisición
+      <span class="badge bg-secondary ms-2">{{ form.get('title')?.value }}</span>
+      <i class="fas fa-calendar-alt me-2"></i>Mes de Solicitud
+      <span class="badge bg-primary me-3">{{ form.get('date1')?.value }}</span>
+    </h4>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-primary btn-sm" routerLink="/dashboard">
+        <i class="fas fa-home me-2"></i>Menú Principal
+      </button>
+      <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+        <i class="fas fa-arrow-left me-2"></i>Regresar
+      </button>
+    </div>
+  </div>
+
+  <!-- Información general -->
+  <div class="row g-3 mb-4 bg-light p-3 rounded-3">
+    <div class="col-md-3">
+      <label class="small text-muted">Área</label>
+      <div class="fw-semibold">{{ form.get('area_name')?.value || '-' }}</div>
+    </div>
+    <div class="col-md-3">
+      <label class="small text-muted">Subárea</label>
+      <div class="fw-semibold">{{ form.get('subarea_name')?.value || '-' }}</div>
+    </div>
+    <div class="col-md-3">
+      <label class="small text-muted">Estatus</label>
+      <div><span class="badge bg-info text-capitalize">{{ form.get('status')?.value }}</span></div>
+    </div>
+    <div class="col-md-3">
+      <label class="small text-muted">Solicitada</label>
+      <div class="fw-semibold">{{ form.get('requested_at')?.value || '-' }}</div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <ng-container *ngIf="!loading; else loadingTpl">
+    <form [formGroup]="form">
+
+      <!-- Resumen Inteligente IA -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card bg-light border-0 shadow-sm text-center py-3">
+            <div class="fs-2 fw-bold text-primary mb-1">
+              <i [ngClass]="{
+                'bi-graph-up-arrow text-success': iaSummary.trend === 'alza',
+                'bi-graph-down-arrow text-danger': iaSummary.trend === 'baja',
+                'bi-activity text-secondary': iaSummary.trend === 'estable'
+              }"></i>
+            </div>
+            <div class="fw-bold">Tendencia general</div>
+            <div class="small text-muted text-capitalize">{{ iaSummary.trend }}</div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card bg-light border-0 shadow-sm text-center py-3">
+            <div class="fs-2 fw-bold text-warning mb-1">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="fw-bold">Productos con alertas</div>
+            <div class="small text-muted">{{ iaSummary.alerts }} detectados</div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card bg-light border-0 shadow-sm text-center py-3">
+            <div class="fs-2 fw-bold text-info mb-1">
+              <i class="bi bi-lightbulb-fill"></i>
+            </div>
+            <div class="fw-bold">Nivel de confianza IA</div>
+            <div class="small text-muted">
+              {{ iaSummary.confidence | number: '1.0-1' }} %
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de ítems -->
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+          <thead class="bg-primary text-white">
+  <tr class="text-center align-middle">
+    <th style="width: 18%">Producto</th>
+    <th style="width: 6%">Unidad</th>
+    
+    <!-- MES ANTERIOR (Octubre 2025 → siempre automático) -->
+    <th style="width: 7%">
+      {{ getMonthName(-1) | titlecase }} {{ currentYear }}
+      <br><small class="text-white-50 opacity-75">mes anterior</small>
+    </th>
+    
+    <!-- HACE 2 MESES (Septiembre 2025 → automático) -->
+    <th style="width: 7%">
+      {{ getMonthName(-2) | titlecase }} {{ currentYear }}
+      <br><small class="text-white-50 opacity-75">hace 2 meses</small>
+    </th>
+    
+    <!-- HACE 3 MESES (Agosto 2025 → automático) -->
+    <th style="width: 7%">
+      {{ getMonthName(-3) | titlecase }} {{ currentYear }}
+      <br><small class="text-white-50 opacity-75">hace 3 meses</small>
+    </th>
+    
+    <th style="width: 7%">Solicitado</th>
+    <th style="width: 12%">Recomendado (IA)</th>
+    <th style="width: 8%">Stock Real</th>
+    <th style="width: 8%">Aprobar</th>
+    <th style="width: 20%">Análisis IA</th>
+  </tr>
+</thead>
+
+          <tbody formArrayName="items">
+            <tr *ngFor="let it of items.controls; let i = index" [formGroupName]="i" class="animate__animated animate__fadeIn">
+              <!-- Producto -->
+              <td class="fw-semibold">{{ it.get('product_name')?.value }}</td>
+
+              <!-- Unidad -->
+              <td class="text-center text-muted small">{{ it.get('unit_name')?.value }}</td>
+
+              <!-- Meses anteriores -->
+              <td class="text-center fw-semibold"
+    [ngClass]="{
+      'text-success': (it.get('prev_month_1')?.value || 0) > (it.get('requested_qty')?.value || 0) * 1.1,
+      'text-danger': (it.get('prev_month_1')?.value || 0) < (it.get('requested_qty')?.value || 0) * 0.9,
+      'text-muted': !it.get('prev_month_1')?.value
+    }">
+  {{ it.get('prev_month_1')?.value || '-' }}
+</td>
+
+<!-- HACE 2 MESES (prev_month_2 → Septiembre) -->
+<td class="text-center fw-semibold"
+    [ngClass]="{
+      'text-success': (it.get('prev_month_2')?.value || 0) > (it.get('requested_qty')?.value || 0) * 1.1,
+      'text-danger': (it.get('prev_month_2')?.value || 0) < (it.get('requested_qty')?.value || 0) * 0.9,
+      'text-muted': !it.get('prev_month_2')?.value
+    }">
+  {{ it.get('prev_month_2')?.value || '-' }}
+</td>
+
+<!-- HACE 3 MESES (prev_month_3 → Agosto) -->
+<td class="text-center fw-semibold"
+    [ngClass]="{
+      'text-success': (it.get('prev_month_3')?.value || 0) > (it.get('requested_qty')?.value || 0) * 1.1,
+      'text-danger': (it.get('prev_month_3')?.value || 0) < (it.get('requested_qty')?.value || 0) * 0.9,
+      'text-muted': !it.get('prev_month_3')?.value
+    }">
+  {{ it.get('prev_month_3')?.value || '-' }}
+</td>
+
+              <!-- Solicitado -->
+              <td class="text-center fw-bold text-primary">
+                {{ it.get('requested_qty')?.value | number:'1.0-0':'es-MX' }}
+              </td>
+
+              <!-- Recomendado (IA) -->
+              <td class="text-center">
+                <span
+                  class="badge fs-7 fw-bold"
+                  [ngClass]="{
+                    'bg-success text-white': (it.get('recommended_qty')?.value || 0) === (it.get('requested_qty')?.value || 0),
+                    'bg-warning text-dark': (it.get('recommended_qty')?.value || 0) < (it.get('requested_qty')?.value || 0),
+                    'bg-info text-white': (it.get('recommended_qty')?.value || 0) > (it.get('requested_qty')?.value || 0)
+                  }"
+                  [attr.title]="it.get('reason')?.value"
+                >
+                  {{ it.get('recommended_qty')?.value || '-' }}
+                </span>
+
+                <!-- ALERTA OFICIO -->
+                <div *ngIf="it.get('total_oficio')?.value > it.get('total_requisicion')?.value" 
+                     class="badge bg-danger mt-1 d-block">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  {{ ((it.get('total_oficio')?.value / (it.get('total_oficio')?.value + it.get('total_requisicion')?.value || 1)) * 100) | number:'1.0-1' }}% por oficio
+                </div>
+              </td>
+
+              <!-- Stock Real -->
+              <td class="text-center">
+                <span class="badge fs-7 fw-bold"
+                      [ngClass]="{
+                        'bg-success text-white': it.get('real_stock')?.value > 10,
+                        'bg-warning text-dark': it.get('real_stock')?.value > 0 && it.get('real_stock')?.value <= 10,
+                        'bg-danger text-white': it.get('real_stock')?.value === 0
+                      }">
+                  {{ it.get('real_stock')?.value }}
+                </span>
+                <small class="text-muted d-block">disponible</small>
+              </td>
+
+              <!-- Aprobar -->
+              <td>
+                <input
+                  type="text"
+                  class="form-control form-control-sm text-end"
+                  formControlName="approved_qty"
+                  appNumberFormat
+                  [class.is-invalid]="it.get('approved_qty')?.invalid && it.get('approved_qty')?.touched"
+                  placeholder="0"
+                />
+                <div class="invalid-feedback" *ngIf="it.get('approved_qty')?.touched && it.get('approved_qty')?.invalid">
+                  <div *ngIf="it.get('approved_qty')?.errors?.required">Requerido.</div>
+                  <div *ngIf="it.get('approved_qty')?.errors?.min">No puede ser negativo.</div>
+                  <div *ngIf="it.get('approved_qty')?.errors?.pattern">Solo números enteros.</div>
+                  <div *ngIf="it.get('approved_qty')?.errors?.maxStock">
+                    <i class="fas fa-exclamation-triangle"></i> Máximo: {{ it.get('real_stock')?.value }}
+                  </div>
+                </div>
+              </td>
+
+              <!-- ANÁLISIS IA COMPLETO -->
+              <td class="small">
+                <!-- Justificación -->
+                <div *ngIf="it.get('reason')?.value" class="text-muted mb-1">
+                  <i class="bi bi-chat-left-text text-info me-1"></i>
+                  {{ it.get('reason')?.value }}
+                </div>
+
+                <!-- Sugerencia Preventiva -->
+                <div *ngIf="it.get('sugerencia_preventiva')?.value" 
+                     class="alert alert-info p-2 mb-1 small">
+                  <strong>Prevención:</strong> {{ it.get('sugerencia_preventiva')?.value }}
+                </div>
+
+                <!-- Flags -->
+                <div *ngIf="it.get('flags')?.value?.length" class="mt-1">
+                  <span
+                    *ngFor="let flag of it.get('flags')?.value"
+                    class="badge me-1 fs-8"
+                    [ngClass]="{
+                      'bg-danger text-white': flag === 'oficio_sospechoso' || flag === 'stock_insuficiente',
+                      'bg-warning text-dark': flag === 'desviacion_alta',
+                      'bg-secondary text-white': true
+                    }"
+                  >
+                    {{ flag | titlecase }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Observaciones</label>
+        <textarea
+          class="form-control"
+          rows="3"
+          formControlName="observations"
+          placeholder="Notas u observaciones para la aprobación…"
+        ></textarea>
+      </div>
+
+      <!-- Alertas de estado -->
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-info mb-3" *ngIf="form.get('status')?.value === 'approved'">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Requisición aprobada</strong> el {{ form.get('approved_at')?.value }}
+            <br><small>No se pueden modificar las cantidades.</small>
+          </div>
+
+          <div class="alert alert-warning mb-3" *ngIf="form.get('status')?.value === 'draft'">
+            <i class="fas fa-edit me-2"></i>
+            Esta requisición está en <strong>borrador</strong>. Debe enviarse primero.
+          </div>
+
+          <div class="alert alert-danger mb-3" *ngIf="form.get('status')?.value === 'rejected'">
+            <i class="fas fa-times-circle me-2"></i>
+            Esta requisición fue <strong>rechazada</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="d-flex justify-content-end gap-3 mt-4">
+        <button 
+          type="button"
+          (click)="analyzeWithAI()" 
+          [disabled]="analyzing"
+          class="btn btn-outline-primary btn-lg px-5 shadow-sm d-flex align-items-center">
+          <span *ngIf="!analyzing">
+            Reanalizar con IA
+          </span>
+          <span *ngIf="analyzing">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Analizando...
+          </span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn btn-success btn-lg px-5 shadow-sm" 
+          (click)="approve()"
+          [disabled]="loading || form.get('status')?.value === 'approved'">
+          <i class="fas fa-check-double me-2"></i>
+          Aprobar y Generar Salida
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <!-- Gráfico de consumo -->
+  <div class="card mt-5" *ngIf="items.length">
+    <div class="card-header border-0 pt-6">
+      <h3 class="card-title">
+        <span class="card-label fw-bold text-dark">Histórico de Consumo (3 Meses)</span>
+      </h3>
+    </div>
+    <div class="card-body p-4">
+      <canvas #chartCanvas *ngIf="items.length > 0"></canvas>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <ng-template #loadingTpl>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3 mb-0 text-muted">Cargando detalles de la requisición...</p>
+    </div>
+  </ng-template>
+</div>

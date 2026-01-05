@@ -1,0 +1,25 @@
+canvas {
+  width: 100% !important;
+  height: 350px !important;
+}
+
+
+  .btn-hover-rise {
+    transition: all 0.3s ease;
+  }
+  .btn-hover-rise:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+  .form-select-solid {
+    border-radius: 0.375rem;
+  }
+
+  #chartForecast, #chartComparison {
+  width: 100% !important;
+  max-height: 320px !important;
+}
+.card-body canvas {
+  display: block;
+  margin: 0 auto;
+}

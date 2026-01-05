@@ -1,0 +1,11 @@
+<button 
+  *ngIf = "!(ui.visible$ | async)"
+  class="chat-fab" 
+  (click)="open()"
+  >
+  <span class="icon">💬</span>
+
+  <span *ngIf="unread > 0" class="badge">
+    {{ unread }}
+    </span>
+</button>

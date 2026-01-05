@@ -1,0 +1,151 @@
+<div class="card">
+  <!-- Card Header -->
+  <div class="card-header border-0 pt-6">
+    <!-- Card Title -->
+    <div class="card-title">
+      <!-- Search Input -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="position-relative">
+          <i class="ki-duotone ki-magnifier fs-3 position-absolute start-0 top-50 translate-middle-y ms-4"
+             style="color: #555;">
+            <span class="path1"></span><span class="path2"></span>
+          </i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" 
+            (input)="onSearchChange()"
+            (keyup.enter)="searchSignatories()"
+            class="form-control form-control-solid w-350px ps-12" 
+            placeholder="Buscar por nombre, departamento o cargo..."
+          />
+        </div>
+        
+        <button class="btn btn-primary" (click)="searchSignatories()">
+          <i class="ki-duotone ki-magnifier fs-2 me-2"></i> Buscar
+        </button>
+        
+        <button class="btn btn-light-primary" (click)="refresh()">
+          <i class="ki-duotone ki-arrows-circle fs-2 me-2"></i> Refrescar
+        </button>
+        
+        <button class="btn btn-light-primary" (click)="back()">
+          <i class="ki-duotone ki-arrow-left fs-2 me-2"></i> Regresar
+        </button>
+      </div>
+    </div>
+
+    <div class="card-toolbar">
+      <button type="button" class="btn btn-primary" (click)="createSignatory()">
+        <i class="ki-duotone ki-plus fs-2 me-2"></i> Agregar Firmante
+      </button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body pt-0">
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoading$ | async" class="text-center py-10">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mt-2">Cargando firmantes...</p>
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!(isLoading$ | async)" class="table-responsive">
+      <table class="table align-middle table-row-dashed fs-6 gy-5">
+        <thead>
+          <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+            <th class="min-w-200px">Departamento</th>
+            <th class="min-w-200px">Cargo</th>
+            <th class="min-w-250px">Nombre Completo</th>
+            <th class="min-w-100px">Estado</th>
+            <th class="text-end min-w-100px">Acciones</th>
+          </tr>
+        </thead>
+        
+        <tbody class="fw-semibold text-gray-600">
+          <!-- Empty State -->
+          <tr *ngIf="SIGNATORIES.length === 0">
+            <td colspan="5" class="text-center py-10">
+              <div class="alert alert-light d-flex align-items-center p-5">
+                <i class="ki-duotone ki-information fs-2x text-primary me-4">
+                  <span class="path1"></span>
+                  <span class="path2"></span>
+                  <span class="path3"></span>
+                </i>
+                <div class="d-flex flex-column">
+                  <span class="fw-bold fs-6">No hay firmantes registrados</span>
+                  <span class="text-muted">Comienza agregando un nuevo firmante</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data Rows -->
+          <tr *ngFor="let s of SIGNATORIES">
+            <td>
+              <span class="badge badge-light-primary fs-7 fw-bold px-3 py-2">
+                {{ s.departament | titlecase }}
+              </span>
+            </td>
+            <td class="fw-bold">{{ s.position }}</td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="text-gray-900 fw-bold">
+                  {{ s.title ? s.title + '. ' : '' }}{{ s.name }}
+                </span>
+                <!--<small class="text-muted">ID: {{ s.id }}</small>-->
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-lg" 
+                    [class.badge-light-success]="s.is_active" 
+                    [class.badge-light-danger]="!s.is_active">
+                {{ s.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="text-end">
+              <div class="btn-group" role="group">
+                <!-- Edit Button -->
+                      <a  href="#" onclick="return false;" (click)="editSignatory(s)" 
+                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                        <i class="ki-duotone ki-pencil fs-2">
+                          <span class="path1"></span><span class="path2"></span>
+                        </i>
+                      </a>
+                <!-- Delete Button -->
+                      <a href="#" onclick="return false;" (click)="deleteSignatory(s)"  
+                        class="btn btn-icon btn-bg-light btn-active-color -primary btn-sm me">
+                        <i class="ki-duotone ki-trash fs-2">
+                          <span class="path1"></span><span class="path2"></span>
+                          <span class="path3"></span><span class="path4"></span>
+                          <span class="path5"></span> <!-- Ajuste para que el ícono del bote de basura aparezca bien -->
+                        </i>
+                      </a>
+                
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginación (solo si hay datos) -->
+      <div *ngIf="SIGNATORIES.length > 0 && totalPages > 1" class="mt-5">
+        <ngb-pagination
+          [collectionSize]="totalPages"
+          [(page)]="currentPage"
+          [pageSize]="10"
+          (pageChange)="loadPage($event)"
+          class="d-flex justify-content-center"
+          aria-label="Paginación de firmantes">
+        </ngb-pagination>
+        
+        <div class="text-center text-muted mt-2">
+          Mostrando {{ SIGNATORIES.length }} de {{ totalPages }} registros
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

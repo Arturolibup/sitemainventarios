@@ -1,0 +1,992 @@
+<!-- Contenedor principal con diseño de Metronic -->
+<div class="d-flex flex-column flex-root">
+  <div class="content d-flex flex-column flex-column-fluid">
+    <!-- ✅ Notificaciones unificadas -->
+    <div *ngIf="notifications.length" class="notifications-container">
+      <div *ngFor="let notification of notifications" 
+           class="alert alert-dismissible fade show mb-2"
+           [ngClass]="{
+             'alert-info': notification.type === 'info',
+             'alert-success': notification.type === 'success',
+             'alert-danger': notification.type === 'error',
+             'alert-warning': notification.type === 'warning'
+           }" role="alert">
+
+        <strong *ngIf="notification.title">{{ notification.title }}</strong>
+        <div>{{ notification.message }}</div>
+
+        <button type="button" class="close" (click)="dismissNotification(notification.id)">
+          <span>&times;</span>
+        </button>
+        <button type="button" class="btn btn-link btn-sm p-0 ml-2" 
+                *ngIf="!notification.is_read"
+                (click)="markNotificationAsRead(notification.id)">
+          Marcar como leída
+        </button>
+      </div>
+    </div>
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-column-fluid">
+      <div class="container-fluid">
+        <div class="card card-custom card-sticky">
+          <div class="card-header">
+            <div class="card-title">
+              <h3 class="card-label">
+                {{ mode === 'create' ? 'Crear Orden de Pedido' : 
+                   mode === 'create_sf' ? 'Crear Suficiencia Presupuestal' : 
+                   mode === 'validate_sf' ? 'Validar Suficiencia Presupuestal' : 
+                   mode === 'update' ? 'Editar Orden de Pedido' : 
+                   mode === 'assign_partidas' ? 'Asignar Partidas' : 
+                   mode === 'add_order_number' ? 'Validar Orden P.' : 'Recibir Productos' }}
+              </h3>
+            </div>
+            <div class="card-toolbar">
+              <button type="button" class="btn btn-light-primary" (click)="cancel()">
+                <i class="ki ki-arrow-back"></i> Regresar
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- Formulario principal -->
+            <form [formGroup]="orderForm" (ngSubmit)="submit()">
+              <div class="row">
+                <!-- Información general -->
+                <div class="col-lg-6">
+                  <!-- Campo FOLIO (foliosf) -->
+                  <div class="form-group">
+                    <label>FOLIO</label>
+                    <input type="text" class="form-control" formControlName="foliosf" 
+                           (input)="toUpperCase($event)"
+                           (blur)="validateFoliosf(orderForm.get('foliosf')?.value)" 
+                           placeholder="Ej. SF-2025-001" 
+                           [ngClass]="{'is-invalid': orderForm.get('foliosf')?.touched && orderForm.get('foliosf')?.invalid}">
+                    <div *ngIf="orderForm.get('foliosf')?.touched && orderForm.get('foliosf')?.errors?.notUnique" 
+                         class="invalid-feedback">El Folio ya está en uso. Por favor ingresa un Folio diferente</div>
+                    <div *ngIf="orderForm.get('foliosf')?.touched && orderForm.get('foliosf')?.errors?.required" 
+                         class="invalid-feedback">El Folio es obligatorio</div>
+                  </div>
+
+                  <!-- Campo numero de orden -->
+                  <div class="form-group">
+                    <label>Número de Orden</label>
+                    <input type="text" class="form-control" formControlName="order_number" 
+                           (input)="toUpperCase($event)" 
+                           (blur)="validateOrderNumber(orderForm.get('order_number')?.value)"
+                           placeholder="Ej. OP-2025-001" 
+                           [ngClass]="{'is-invalid': orderForm.get('order_number')?.touched && orderForm.get('order_number')?.invalid}">
+                    <div *ngIf="orderForm.get('order_number')?.touched && orderForm.get('order_number')?.errors?.notUnique" 
+                         class="invalid-feedback">Esta orden de pedido ya existe. Por favor ingresa una diferente</div>
+                    <div *ngIf="orderForm.get('order_number')?.touched && orderForm.get('order_number')?.errors?.required" 
+                         class="invalid-feedback">El número de orden es obligatorio.</div>
+                  </div>
+
+                  <!-- Campo fecha -->
+                  <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" class="form-control" formControlName="date" 
+                           (focus)="openDatePicker($event)"
+                           [ngClass]="{'is-invalid': orderForm.get('date')?.touched && orderForm.get('date')?.invalid}">
+                    <div *ngIf="orderForm.get('date')?.touched && orderForm.get('date')?.invalid" 
+                         class="invalid-feedback">La fecha es obligatoria.</div>
+                  </div>
+
+                  <!-- Campo fecha limite-->
+                  <div class="form-group">
+                    <label>Fecha Límite</label>
+                    <input type="date" class="form-control" formControlName="date_limited" 
+                           (focus)="openDatePicker($event)"
+                           [ngClass]="{'is-invalid': orderForm.get('date_limited')?.touched && orderForm.get('date_limited')?.invalid}">
+                    <div *ngIf="orderForm.get('date_limited')?.touched && orderForm.get('date_limited')?.invalid" 
+                         class="invalid-feedback">La fecha límite es obligatoria.</div>
+                    <div *ngIf="orderForm.errors?.['invalidDateRange'] && orderForm.touched" 
+                         class="invalid-feedback d-block">
+                      La fecha límite debe ser al menos un día después de la fecha.
+                    </div>
+                  </div>
+
+                  <!--campos de financiamiento-->
+                  <div class="form-group">
+                    <label>Tipos de Financiamiento</label>
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" formControlName="subsidio_estatal">
+                          <label class="form-check-label">Subsidio Estatal</label>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" formControlName="ingresos_propios">
+                          <label class="form-check-label">Ingresos Propios</label>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" formControlName="federal">
+                          <label class="form-check-label">Federal</label>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" formControlName="mixto">
+                          <label class="form-check-label">Mixto</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="orderForm.errors?.['atLeastOneFinancingType'] && orderForm.touched" 
+                         class="invalid-feedback d-block">Debe seleccionar al menos un tipo de financiamiento.</div>
+                  </div>
+
+                  <!--tipo de formato-->
+                  <div class="form-group">
+                    <label>Tipo de Formato</label>
+                    <select class="form-control" formControlName="format_type"
+                            [ngClass]="{'is-invalid': orderForm.get('format_type')?.touched && orderForm.get('format_type')?.invalid}">
+                      <option *ngFor="let format of formatTypes" [value]="format.value">{{ format.label }}</option>
+                    </select>
+                    <div *ngIf="orderForm.get('format_type')?.touched && orderForm.get('format_type')?.invalid" 
+                         class="invalid-feedback">El tipo de formato es obligatorio.</div>
+                  </div>
+
+                  <!--campo de proceso o contrato-->
+                  <div class="form-group">
+                    <label>Proceso</label>
+                    <input type="text" class="form-control" formControlName="process"
+                           (input)="toUpperCase($event)" placeholder="Ej. Licitación" 
+                           [ngClass]="{'is-invalid': orderForm.get('process')?.touched && orderForm.get('process')?.invalid}">
+                    <div *ngIf="orderForm.get('process')?.touched && orderForm.get('process')?.invalid" 
+                         class="invalid-feedback">El proceso es obligatorio.</div>
+                  </div>
+
+                  <!--tipo de proveedor-->
+                  <div class="form-group">
+                    <label>Proveedor</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" 
+                             formControlName="provider_name" 
+                             placeholder="Selecciona un proveedor" 
+                             (click)="openProviderModal()"
+                             [ngClass]="{'is-invalid': orderForm.get('provider_id')?.touched && orderForm.get('provider_id')?.invalid}">
+                      <div class="input-group-append">
+                        <button class="btn btn-primary border-2 py-2 px-3" 
+                                type="button" (click)="openProviderModal()"
+                                title="Buscar Proveedor">
+                          <i class="ki ki-search mr-1"></i>Buscar
+                        </button>
+                      </div>
+                    </div>
+                    <div *ngIf="orderForm.get('provider_id')?.touched && orderForm.get('provider_id')?.invalid" 
+                         class="invalid-feedback">El proveedor es obligatorio.</div>
+                  </div>
+                </div>
+
+                <!-- campo area solicitante -->
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label>Área Solicitante</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" 
+                             formControlName="requester_area_name" 
+                             readonly placeholder="Selecciona una subarea para autocompletar el área"
+                             [ngClass]="{'is-invalid': orderForm.get('requester_area_id')?.touched && orderForm.get('requester_area_id')?.invalid}">
+                    </div>
+                    <div *ngIf="orderForm.get('requester_area_id')?.touched && orderForm.get('requester_area_id')?.invalid" 
+                         class="invalid-feedback">El área solicitante es obligatoria.</div>
+                  </div>
+
+                  <!-- Campo de Subárea (con modal) -->
+                  <div class="form-group">
+                    <label>Subárea</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" 
+                             formControlName="requester_subarea_name" 
+                             readonly 
+                             placeholder="Haz clic para seleccionar subárea"
+                             (click)="openSubareaModal()"
+                             [ngClass]="{'is-invalid': orderForm.get('requester_subarea_id')?.touched && orderForm.get('requester_subarea_id')?.invalid}">
+                      <div class="input-group-append">
+                        <button class="btn btn-primary border-2 py-2 px-3" type="button" 
+                                (click)="openSubareaModal()" title="Buscar subárea">
+                          <i class="ki ki-search mr-1"></i>Buscar
+                        </button>
+                      </div>
+                    </div>
+                    <div *ngIf="orderForm.get('requester_subarea_id')?.touched && orderForm.get('requester_subarea_id')?.invalid" 
+                         class="invalid-feedback">La subárea es obligatoria.</div>
+                  </div>
+
+                  <!--campo de ur de formato-->
+                  <div class="form-group">
+                    <label>UR</label>
+                    <input type="number" class="form-control" formControlName="ur" readonly 
+                           [ngClass]="{'is-invalid': orderForm.get('ur')?.touched && orderForm.get('ur')?.invalid}">
+                    <div *ngIf="orderForm.get('ur')?.touched && orderForm.get('ur')?.invalid" 
+                         class="invalid-feedback">La UR es obligatoria.</div>
+                  </div>
+
+                  <!--campo de lugar de entrega-->
+                  <div class="form-group">
+                    <label>Lugar de Entrega</label>
+                    <input type="text" class="form-control" formControlName="delivery_place" 
+                           (input)="toUpperCase($event)" placeholder="Ej. ALMACÉN CENTRAL" 
+                           [ngClass]="{'is-invalid': orderForm.get('delivery_place')?.touched && orderForm.get('delivery_place')?.invalid}">
+                    <div *ngIf="orderForm.get('delivery_place')?.touched && orderForm.get('delivery_place')?.invalid" 
+                         class="invalid-feedback">El lugar de entrega es obligatorio.</div>
+                  </div>
+
+                  <!--campo de no. de beneficiarios-->
+                  <div class="form-group">
+                    <label>No. Beneficiarios</label>
+                    <input type="text" class="form-control" formControlName="no_beneficiarios"
+                           placeholder="Ej. 36"
+                           [ngClass]="{'is-invalid': orderForm.get('no_beneficiarios')?.touched && orderForm.get('no_beneficiarios')?.invalid}">
+                    <div *ngIf="orderForm.get('no_beneficiarios')?.touched && orderForm.get('no_beneficiarios')?.errors" class="invalid-feedback">
+                      <span *ngIf="orderForm.get('no_beneficiarios')?.errors?.['required']">
+                        El número de beneficiarios es obligatorio.
+                      </span>
+                      <span *ngIf="orderForm.get('no_beneficiarios')?.errors?.['pattern']">
+                        Debe ser un número válido.
+                      </span>
+                    </div>
+                  </div>
+
+                  <!--campo de elaboro usuario--> 
+                  <div class="form-group">
+                    <label>Elaboró</label>
+                    <div *ngIf="user" class="form-control" readonly>{{user.name}} {{user.surname}}</div>
+                    <div *ngIf="!user" class="form-control" readonly>Cargando usuario...</div>
+                  </div>
+
+                  <!--observaciones generales recibido en almacen-->
+                  <div class="form-group">
+                    <label>Observaciones Generales</label>
+                    <textarea class="form-control" formControlName="general_observations" 
+                              rows="4" placeholder="Observaciones adicionales"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sección de productos -->
+              <div class="separator separator-dashed my-10"></div>
+              <h4 class="mb-5">Productos</h4>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr class="text-center bg-gray-100">
+                      <th>Oficio Origen</th>
+                      <th>UR</th>
+                      <th *ngIf="showAutomotrizFields" class="text-center">Placa</th>
+                      <th *ngIf="showAutomotrizFields" class="text-center">Marca</th>
+                      <th *ngIf="showAutomotrizFields" class="text-center">Tipo</th>
+                      <th *ngIf="showAutomotrizFields" class="text-center">Modelo</th>
+                      <th *ngIf="showAutomotrizFields" class="text-center">Cilindros</th>
+                      <th>Grupo</th>
+                      <th>Subgrupo</th>
+                      <th>No.Progresivo</th>
+                      <th>Descripción</th>
+                      <th>Marca</th>
+                      <th>U de M</th>
+                      <th>Cantidad</th>
+                      <th>Precio Unitario</th>
+                      <th>Partida</th>
+                      <th>Importe</th>
+                      <th *ngIf="mode === 'receive'">Cantidad Recibida</th>
+                      <th *ngIf="mode === 'receive'">Entregado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="products">
+                    <tr *ngFor="let product of productsFormArray.controls; let i = index" [formGroupName]="i">
+                      <td>
+                        <input type="text" class="form-control input-oficio" 
+                               formControlName="oficio" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('oficio')?.touched && product.get('oficio')?.invalid}">
+                        <div *ngIf="product.get('oficio')?.touched && product.get('oficio')?.invalid" 
+                             class="invalid-feedback">Requerido</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-ur" 
+                               formControlName="ur_progressive" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('ur_progressive')?.touched && product.get('ur_progressive')?.invalid}">
+                        <div *ngIf="product.get('ur_progressive')?.touched && product.get('ur_progressive')?.invalid" 
+                             class="invalid-feedback">Ur es Requerido</div>
+                      </td>
+
+                      <!-- Campos para refacciones automotrices -->
+                      <td *ngIf="showAutomotrizFields">
+                        <div class="input-group">
+                          <textarea class="form-control input-placa" formControlName="placa" 
+                                    [ngClass]="{'is-invalid': product.get('placa')?.touched && product.get('placa')?.invalid}"
+                                    placeholder="Buscar Vehículo"
+                                    readonly
+                                    (click)="openVehiculoModal(i)"></textarea>
+                          <!--div class="input-group-append">
+                            <button type="button" class="btn btn-primary" (click)="openVehiculoModal(i)">
+                              <i class="ki ki-search"></i>
+                            </button>
+                          </div-->
+                        </div>
+                        <div *ngIf="product.get('placa')?.touched && product.get('placa')?.invalid" 
+                             class="invalid-feedback">Placa</div>
+                      </td>
+
+                      <td *ngIf="showAutomotrizFields">
+                        <textarea class="form-control input-marca" formControlName="marca_nombre" 
+                                  readonly></textarea>
+                        <input type="hidden" formControlName="marca_nombre">
+                      </td>
+
+                      <td *ngIf="showAutomotrizFields">
+                        <textarea class="form-control input-tipo" formControlName="tipo_nombre" 
+                                  readonly></textarea>
+                        <input type="hidden" formControlName="tipo_nombre">
+                      </td>
+
+                      <td *ngIf="showAutomotrizFields">
+                        <textarea class="form-control input-modelo" formControlName="modelo" 
+                                  readonly></textarea>
+                      </td>
+
+                      <td *ngIf="showAutomotrizFields">
+                        <textarea class="form-control input-cilindro" formControlName="cilindro" 
+                                  readonly></textarea>
+                      </td>
+
+                      <td>
+                        <input type="text" class="form-control input-grupo" 
+                               formControlName="grupo" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('grupo')?.touched && product.get('grupo')?.invalid}">
+                        <div *ngIf="product.get('grupo')?.touched && product.get('grupo')?.invalid" 
+                             class="invalid-feedback">Grupo requerido</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-subgrupo" 
+                               formControlName="subgrupo" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('subgrupo')?.touched && product.get('subgrupo')?.invalid}">
+                        <div *ngIf="product.get('subgrupo')?.touched && product.get('subgrupo')?.invalid" 
+                             class="invalid-feedback">Subgrupo requerido</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-progresivo" 
+                               formControlName="progresivo" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('progresivo')?.touched && product.get('progresivo')?.invalid}">
+                        <div *ngIf="product.get('progresivo')?.touched && product.get('progresivo')?.invalid" 
+                             class="invalid-feedback">Numero Progresivo Requerido</div>
+                      </td>
+                      <td>
+                        <div class="input-group">
+                          <textarea class="form-control input-description"
+                                    formControlName="description" readonly 
+                                    (click)="openProductModal(i)" (input)="adjustTextareaHeight($event)"></textarea>
+                          <!--div class="input-group-append">
+                            <button type="button" class="btn btn-primary" (click)="openProductModal(i)">
+                              <i class="ki ki-search"></i>
+                            </button>
+                          </div-->
+                        </div>
+                        <div *ngIf="product.get('description')?.touched && product.get('description')?.invalid" 
+                             class="invalid-feedback">Descripción requerida</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-brand"
+                               formControlName="brand" (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('brand')?.touched && product.get('brand')?.invalid}" readonly>
+                        <div *ngIf="product.get('brand')?.touched && product.get('brand')?.invalid" 
+                             class="invalid-feedback">Marca</div>
+                      </td>
+                      <td>
+                        <select class="form-control input-unit_id"
+                                formControlName="unit_id"
+                                [compareWith]="compareById"
+                                [ngClass]="{'is-invalid': product.get('unit_id')?.touched && product.get('unit_id')?.invalid}">
+                          <option [ngValue]="''">Selecciona</option>
+                          <option *ngIf="shouldShowFallbackUnit(product)" [ngValue]="product.get('unit_id')?.value">
+                            {{ getFallbackUnitLabel(product) }}
+                          </option>
+                          <option *ngFor="let unit of units; trackBy: trackByUnit" [ngValue]="unit.id">
+                            {{ unit.nombre ?? unit.name ?? unit.label ?? ('Unidad ' + (unit.id ?? '')) }}
+                          </option>
+                        </select>
+                        <div *ngIf="product.get('unit_id')?.touched && product.get('unit_id')?.invalid" class="invalid-feedback">
+                          Unidad requerida
+                        </div>
+                      </td>
+                      <td>
+                        <input type="number" class="form-control input-quantity"
+                               formControlName="quantity" (input)="calculateProductAmount(i)" min="1" 
+                               [ngClass]="{'is-invalid': product.get('quantity')?.touched && product.get('quantity')?.invalid}">
+                        <div *ngIf="product.get('quantity')?.touched && product.get('quantity')?.invalid"
+                             class="invalid-feedback">Cantidad mínima: 1</div>
+                      </td>
+                      <td>
+                        <input type="text"
+                               class="form-control input-unit_price"
+                               formControlName="unit_price"
+                               [value]="unitPriceRaw[i]"
+                               (input)="updateUnitPrice(i, $any($event.target)?.value)" 
+                               (blur)="formatUnitPrice(i)"  
+                               [readonly]="mode === 'validate_sf' || mode === 'receive'"
+                               [ngClass]="{
+                                 'is-invalid': product.get('unit_price')?.touched && product.get('unit_price')?.invalid,
+                                 'bg-light': mode === 'validate_sf'
+                               }"
+                        />
+                        <div *ngIf="product.get('unit_price')?.touched && product.get('unit_price')?.invalid" 
+                             class="invalid-feedback">Precio unitario requerido</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-partida" formControlName="partida" 
+                               (input)="toUpperCase($event)" 
+                               [ngClass]="{'is-invalid': product.get('partida')?.touched && product.get('partida')?.invalid}">
+                        <div *ngIf="product.get('partida')?.touched && product.get('partida')?.invalid" 
+                             class="invalid-feedback">Partida requerida</div>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control input-importe"
+                               [ngModel]="formatCurrency(product.get('amount')?.value)"
+                               [ngModelOptions]="{standalone: true}"
+                               readonly
+                               style="text-align: right; font-weight: bold; background-color: #f8f9fa;">
+                        <input type="hidden" formControlName="amount" readonly>
+                      </td>
+                      <td *ngIf="mode === 'receive'">
+                        <input type="number" class="form-control" 
+                               formControlName="received_quantity" 
+                               min="0" [max]="product.get('quantity')?.value" 
+                               (input)="validateReceivedQuantity(i)">
+                        <div *ngIf="product.get('received_quantity')?.touched && product.get('received_quantity')?.invalid" class="invalid-feedback">Cantidad recibida inválida</div>
+                      </td>
+                      <td *ngIf="mode === 'receive'">
+                        <input type="checkbox" class="form-check-input" formControlName="is_delivered">
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-success btn-sm d-flex align-items-center justify-content-center mx-auto" 
+                                style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: 40px; height: 25px;" 
+                                (click)="removeProduct(i)">
+                          <i class="bi bi-trash3" style="font-size: 1.5rem;"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="mt-5">
+                <button type="button" class="btn btn-primary" (click)="addProduct()" 
+                        *ngIf="auth.has('orders.update') || auth.has('orders.create_sf')">
+                  Agregar Producto
+                </button>
+              </div>
+
+              <!-- Sección financiera -->
+              <div class="separator separator-dashed my-10"></div>
+              <h4 class="mb-5">Información Financiera</h4>
+              <div class="row">
+                <div class="col-lg-3">
+                  <div class="form-group">
+                    <label>Subtotal</label>
+                    <input type="text" class="form-control" [value]="financialDisplays['concept_total']" readonly>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="form-group">
+                    <label>IVA</label>
+                    <input type="text"
+                           class="form-control"
+                           [(ngModel)]="ivaEditing"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="onIvaInput($any($event))"
+                           (focus)="onIvaFocus()"
+                           (blur)="onIvaBlur()"
+                           [readonly]="isAutoCalculation"
+                           name="ivaInput" />
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="form-group">
+                    <label>Retención ISR</label>
+                    <input type="text"
+                           class="form-control"
+                           [(ngModel)]="isrEditing"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="onIsrInput($any($event))"
+                           (focus)="onIsrFocus()"
+                           (blur)="onIsrBlur()"
+                           [readonly]="isAutoCalculation"
+                           name="isrInput" />
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="form-group">
+                    <label>Total</label>
+                    <input type="text" class="form-control" [value]="financialDisplays['total']" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" [checked]="isAutoCalculation" (change)="toggleCalculationMode()">
+                  <label class="form-check-label">Cálculo Automático</label>
+                </div>
+              </div>
+
+              <!-- Botones de acción -->
+              <div class="mt-10">
+                <button type="submit"
+                        class="btn btn-success mr-2" 
+                        *ngIf="(mode === 'create_sf' && auth.has('orders.create_sf')) ||
+                               (mode === 'validate_sf' && auth.has('orders.assign_partidas')) ||
+                               (mode === 'add_order_number' && auth.has('orders.add_order_number')) ||
+                               (mode === 'receive' && auth.has('orders.receive')) ||
+                               (mode === 'edit' && auth.has('orders.update'))">
+                  <span *ngIf="isGlobalLoading" class="spinner-border spinner-border-sm mr-2"></span>
+                  {{ mode === 'create_sf' ? 'Crear y Enviar Suficiencia' : 
+                     mode === 'validate_sf' ? 'Validar Suficiencia' : 
+                     mode === 'add_order_number' ? 'Asignar Orden P' : 
+                     mode === 'receive' ? 'Confirmar Recepción' :  
+                     mode === 'edit' ? 'Confirmar Edición' : 'Guardar' }}
+                </button>
+                
+                <button *ngIf="pdfUrl && (mode === 'create_sf' || mode === 'validate_sf' || mode === 'add_order_number')" 
+                        type="button" class="btn btn-primary mr-2" (click)="downloadPdf()">
+                  <i class="bi bi-download"></i> Descargar PDF
+                </button>
+                <button *ngIf="mode === 'receive'" type="button" class="btn btn-primary mr-2" (click)="uploadInvoice()">
+                  <i class="bi bi-upload"></i> Subir Factura
+                </button>
+                
+                <button type="button" class="btn btn-light-primary" (click)="cancel()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Proveedores -->
+<div class="modal fade" id="providerModal" tabindex="-1" role="dialog" aria-hidden="true" 
+     [ngClass]="{'show d-block': showProviderModal}">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Seleccionar Proveedor</h5>
+        <button type="button" class="btn btn-icon btn-light-primary" (click)="closeProviderModal()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" 
+                 [(ngModel)]="providerSearchQuery" 
+                 (ngModelChange)="onProviderSearchChange($event)"
+                 placeholder="Buscar proveedor por nombre...">
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th class="text-center align-middle bg-light">Nombre</th>
+                <th class="text-center align-middle bg-light">RFC</th>
+                <th class="text-center align-middle bg-light">Email</th>
+                <th class="text-center align-middle bg-light">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let provider of filteredProviders; trackBy: trackByProvider" 
+                  (click)="selectProvider(provider)"
+                  style="cursor: pointer;">
+                <td class="text-center">{{ provider.full_name }}</td>
+                <td class="text-center">{{ provider.rfc || 'N/A' }}</td>
+                <td class="text-center">{{ provider.email || 'N/A' }}</td>
+                <td>
+                  <button type="button" class="btn btn-icon btn-light-primary d-flex align-items-center justify-content-center mx-auto"  
+                          style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: 30px; height: 30px;"
+                          (click)="selectProvider(provider); $event.stopPropagation()">
+                    <i class="bi bi-check"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="filteredProviders.length === 0">
+                <td colspan="4" class="text-center py-10">
+                  No se encontraron proveedores para "{{providerSearchQuery}}"
+                  <button *ngIf="providerSearchQuery"
+                          type="button"
+                          class="btn btn-primary mt-2"
+                          (click)="onProviderQueryChange('')">
+                    Mostrar todos los Proveedores
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light-primary" (click)="closeProviderModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Subáreas -->
+<div class="modal fade" id="subareaModal" tabindex="-1" role="dialog" aria-hidden="true" 
+     [ngClass]="{'show d-block': showSubareaModal}">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Seleccionar Subárea</h5>
+        <button type="button" class="btn btn-icon btn-light-primary" (click)="closeSubareaModal()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" 
+                 [(ngModel)]="subareaSearchQuery" 
+                 (ngModelChange)="onSubareaSearchChange($event)" 
+                 placeholder="Buscar subárea...">
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th class="text-center align-middle bg-light">Nombre</th>
+                <th class="text-center align-middle bg-light">Área</th>
+                <th class="text-center align-middle bg-light">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let subarea of filteredSubareas; trackBy: trackBySubarea"
+                  (click)="selectSubarea(subarea)"
+                  style="cursor: pointer;"> 
+                <td class="text-center">{{ subarea.name }}</td>
+                <td class="text-center">{{ subarea.area?.name || 'sin area' }}</td>
+                <td>
+                  <button type="button" class="btn btn-icon btn-light-primary d-flex align-items-center justify-content-center mx-auto"  
+                          style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: 30px; height: 30px;" 
+                          (click)="selectSubarea(subarea); $event.stopPropagation()">
+                    <i class="bi bi-check"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="filteredSubareas.length === 0">
+                <td colspan="3" class="text-center py-10">
+                  <p>No se encontraron subáreas.</p>
+                  <button *ngIf="subareaSearchQuery"
+                          type="button"
+                          class="btn btn-primary mt-2"
+                          (click)="onSubareaQueryChange('')">
+                    Mostrar todas las Subareas
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light-primary" (click)="closeSubareaModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Productos -->
+<div class="modal fade" id="productSearchModal" tabindex="-1" role="dialog" aria-hidden="true" 
+  [ngClass]="{'show d-block': showProductModal !== null}">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Seleccionar Producto</h5>
+        <button type="button" class="btn btn-icon btn-light-primary" (click)="closeProductModal()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" 
+          [(ngModel)]="productSearchQueries[showProductModal ?? 0]" 
+          (ngModelChange)="onProductSearchChange($event, showProductModal ?? 0)" 
+          placeholder="Buscar producto...nombre, sku" #productSearchInput>
+        </div>
+        
+        <div class="mt-4">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th class="text-center align-middle bg-light">Título</th>
+                <th class="text-center align-middle bg-light">Descripción</th>
+                <th class="text-center align-middle bg-light">SKU</th>
+                
+                <th class="text-center align-middle bg-light">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of filteredProducts[showProductModal ?? 0] || []; trackBy:trackByProduct" 
+              (click)="selectProduct(product, showProductModal ?? 0)"
+              style="cursor:pointer;">
+                <td class="text-center align-middle">{{ product.title }}</td>
+                <td class="text-center align-middle">{{ product.description }}</td>
+                <td class="text-center align-middle">{{ product.sku }}</td>
+                
+                <td>
+                  <button type="button" class="btn btn-success btn-sm d-flex align-items-center justify-content-center mx-auto" 
+                  style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: 40px; height: 25px;" 
+                  (click)="selectProduct(product, showProductModal ?? 0, $event)">
+                    <i class="bi bi-send-plus" style="font-size: 1.5rem;"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="(!filteredProducts[showProductModal ?? 0] || filteredProducts[showProductModal ?? 0].length === 0)">
+                <td colspan="5" class="text-center py-10">
+                  No se encontraron productos
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        
+          <button type="button" class="btn btn-primary mb-0" (click)="openCreateProductModal()">
+            {{ showAddProductForm ? 'Cerrar Formulario' : 'Crear Producto Rápido' }}
+          </button>
+        
+        <!--BOTONES MEJORADOS -->
+        <button type="button" class="btn btn-primary" 
+                (click)="addProductFromModal()">
+          <i class="fas fa-plus mr-2"></i>Productos 
+        </button>
+               
+        <button type="button" class="btn btn-light-primary" 
+                (click)="closeProductModal()">
+          Terminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Vehículos -->
+<div class="modal fade" id="vehiculoModal" tabindex="-1" role="dialog" aria-hidden="true" 
+     [ngClass]="{'show d-block': showVehiculoModal !== null}">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Seleccionar Vehículo - Partida {{(showVehiculoModal ?? 0) + 1}}</h5>
+        <button type="button" class="btn btn-icon btn-light-primary" (click)="closeVehiculoModal()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" 
+                 [(ngModel)]="vehiculoSearchQuery" 
+                 (ngModelChange)="onVehiculoSearchChange($event)"
+                 placeholder="Buscar por placa, número económico, serie, marca, tipo...">
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th class="text-center align-middle bg-light">Placa</th>
+                <th class="text-center align-middle bg-light">Número Económico</th>
+                <th class="text-center align-middle bg-light">Numero de Serie</th>
+                <th class="text-center align-middle bg-light">Marca</th>
+                <th class="text-center align-middle bg-light">Tipo</th>
+                <th class="text-center align-middle bg-light">Modelo</th>
+                <th class="text-center align-middle bg-light">Cilindros</th>
+                <th class="text-center align-middle bg-light">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vehiculo of filteredVehiculos; trackBy: trackByVehiculo"
+                  (click)="selectVehiculo(vehiculo)"
+                  style="cursor: pointer;">
+                <td class="text-center align-middle">{{ vehiculo.placa || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.numero_eco || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.numero_serie || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.marca?.nombre || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.tipo?.nombre || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.modelo || 'N/A' }}</td>
+                <td class="text-center align-middle">{{ vehiculo.cilindro || 'N/A' }}</td>
+                <td>
+                  
+
+                  <button type="button" class="btn btn-success btn-sm d-flex align-items-center justify-content-center mx-auto" 
+                  style="padding: 0.25rem 0.5rem; font-size: 0.75rem; width: 40px; height: 25px;" 
+                  (click)="selectVehiculo(vehiculo, $event)">
+                    <i class="bi bi-send-plus" style="font-size: 1.5rem;"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="filteredVehiculos.length === 0">
+                <td colspan="8" class="text-center py-10">
+                  <p>No se encontraron vehículos</p>
+                  <button *ngIf="vehiculoSearchQuery" 
+                          type="button" 
+                          class="btn btn-primary mt-2"
+                          (click)="resetVehiculoSearch()">
+                    Mostrar todos los vehículos
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light-primary" 
+                (click)="closeVehiculoModal()">Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Crear Nuevo Producto -->
+<div class="modal fade" id="createProductModal" tabindex="-1" role="dialog" aria-hidden="true" 
+  [ngClass]="{'show d-block': showCreateProductModal}">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <!-- Header -->
+      <div class="modal-header bg-light-primary border-0">
+        <h5 class="modal-title text-primary">
+          <i class="text-primary mr-2"></i>Crear Nuevo Producto
+        </h5>
+        <button type="button" class="btn btn-icon btn-light-primary" (click)="closeCreateProductModal()">
+          <i class="bi bi-close"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <form [formGroup]="newProductForm">
+          <div class="row">
+            
+            <!-- Columna Izquierda -->
+            <div class="col-lg-6">
+              
+              <!-- Título -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Título *</label>
+                <input type="text" class="form-control" formControlName="title" 
+                       (input)="toUpperCase($event)" 
+                       placeholder="Ingrese el título del producto"
+                       [ngClass]="{'is-invalid': newProductForm.get('title')?.touched && newProductForm.get('title')?.invalid}">
+                <div *ngIf="newProductForm.get('title')?.touched && newProductForm.get('title')?.invalid" 
+                     class="invalid-feedback">El título es obligatorio.</div>
+              </div>
+              
+              <!-- Descripción -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Descripción *</label>
+                <textarea class="form-control" formControlName="description" rows="2" 
+                          (input)="toUpperCase($event)" 
+                          placeholder="Descripción del producto"
+                          [ngClass]="{'is-invalid': newProductForm.get('description')?.touched && newProductForm.get('description')?.invalid}"></textarea>
+                <div *ngIf="newProductForm.get('description')?.touched && newProductForm.get('description')?.invalid" 
+                     class="invalid-feedback">La descripción es obligatoria.</div>
+              </div>
+              
+              <!-- Especificaciones -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Marca</label>
+                <input type="text" class="form-control" formControlName="specifications" 
+                       (input)="toUpperCase($event)"
+                       placeholder="Marca del Producto">
+              </div>
+              
+            </div>
+            
+            <!-- Columna Derecha -->
+            <div class="col-lg-6">
+              
+              <!-- Categoría -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Categoría *</label>
+                <select class="form-control" formControlName="product_categorie_id" 
+                        (change)="onProductCategoryChange($event)" 
+                        [ngClass]="{'is-invalid': newProductForm.get('product_categorie_id')?.touched && newProductForm.get('product_categorie_id')?.invalid}">
+                  <option value="">Selecciona una categoría</option>
+                  <option *ngFor="let category of productCategories" [value]="category.id">{{ category.name }}</option>
+                </select>
+                <div *ngIf="newProductForm.get('product_categorie_id')?.touched && newProductForm.get('product_categorie_id')?.invalid" 
+                     class="invalid-feedback">La categoría es obligatoria.</div>
+              </div>
+              
+              <!-- Unidad -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Unidad *</label>
+                <select class="form-control" formControlName="umbral_unit_id" 
+                        [ngClass]="{'is-invalid': newProductForm.get('umbral_unit_id')?.touched && newProductForm.get('umbral_unit_id')?.invalid}">
+                  <option value="">Selecciona una unidad</option>
+                  <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+                </select>
+                <div *ngIf="newProductForm.get('umbral_unit_id')?.touched && newProductForm.get('umbral_unit_id')?.invalid" 
+                     class="invalid-feedback">La unidad es obligatoria.</div>
+              </div>
+              
+              <!-- Precio General -->
+              <div class="form-group mb-4">
+                <label class="font-weight-bold text-dark">Precio General *</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                  </div>
+                  <input type="number" class="form-control" formControlName="price_general" min="0" step="0.01" 
+                         placeholder="0.00"
+                         [ngClass]="{'is-invalid': newProductForm.get('price_general')?.touched && newProductForm.get('price_general')?.invalid}">
+                </div>
+                <div *ngIf="newProductForm.get('price_general')?.touched && newProductForm.get('price_general')?.invalid" 
+                     class="invalid-feedback">El precio es obligatorio y debe ser mayor o igual a 0.</div>
+              </div>
+              
+            </div>
+          </div>
+        </form>
+
+        <!-- Mensaje de éxito -->
+        <div *ngIf="productCreatedMessage" class="alert alert-success mt-3">
+          <i class="ki ki-check-circle mr-2"></i>{{ productCreatedMessage }}
+        </div>
+      </div>
+
+      <!-- Footer - Botones al final del modal -->
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-light-primary font-weight-bold" 
+                (click)="closeCreateProductModal()">
+          <i class="ki ki-close mr-2"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-success font-weight-bold" 
+                (click)="createQuickProduct()"
+                [disabled]="newProductForm.invalid">
+          <i class="check mr-2"></i>Crear Producto
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <!-- DEBUG (solo para pruebas) -->
+<div class="p-3 bg-light border mt-3">
+  <p class="mb-1"><strong>Depuración:</strong></p>
+  <pre style="font-size: 12px;">
+    valid: {{ newProductForm.valid }}
+    invalid: {{ newProductForm.invalid }}
+    errors: {{ newProductForm.errors | json }}
+    values: {{ newProductForm.value | json }}
+  </pre>
+</div>
+</div>
+             
+

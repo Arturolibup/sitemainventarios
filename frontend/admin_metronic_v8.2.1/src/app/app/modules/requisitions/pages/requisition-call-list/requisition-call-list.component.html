@@ -1,0 +1,160 @@
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="mb-0 fw-bold text-primary">📅 Convocatorias de Requisiciones</h4>
+    <div class="d-flex gap-2">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por título, año o mes"
+        (input)="onSearchInput($event)"
+        style="width: 240px"
+      />
+      <button class="btn btn-outline-primary me-2" routerLink="/dashboard">
+        <i class="fa fa-home me-2"></i>Menú Principal
+      </button>
+      <button *ngIf="canManage" class="btn btn-primary" (click)="toggleForm()">
+        {{ showForm ? 'Cerrar' : '➕ Nueva Convocatoria' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body" *ngIf="!loading; else loadingTpl">
+    <!-- Formulario (solo admin) -->
+    <div *ngIf="showForm && canManage" class="border rounded p-3 mb-4">
+      <h5 class="fw-bold mb-3 text-secondary">
+        {{ selectedCall ? '✏️ Editar convocatoria' : '🆕 Nueva convocatoria' }}
+      </h5>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Título</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.title" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Año</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.year" min="2020" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Mes</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.month" min="1" max="12" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Apertura</label>
+          <input type="datetime-local" class="form-control" [(ngModel)]="formData.open_at" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Cierre</label>
+          <input type="datetime-local" class="form-control" [(ngModel)]="formData.close_at" />
+        </div>
+        <div class="col-md-6 d-flex align-items-center">
+          <label class="form-check-label me-2">Activa</label>
+          <input type="checkbox" class="form-check-input" [(ngModel)]="formData.is_active" />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Notas</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="formData.notes"></textarea>
+        </div>
+      </div>
+
+      <div class="mt-4 text-end">
+        <button *ngIf="canManage" class="btn btn-secondary me-2" (click)="toggleForm()">Cancelar</button>
+        <button *ngIf="canManage" class="btn btn-success" (click)="saveOrUpdate()">
+          {{ selectedCall ? '💾 Actualizar' : '✅ Guardar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle text-center">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Año</th>
+            <th>Mes</th>
+            <th>Título</th>
+            <th>Abre</th>
+            <th>Cierra</th>
+            <th>Activa</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filteredCalls">
+            <td>{{ c.id }}</td>
+            <td>{{ c.year }}</td>
+            <td>{{ c.month }}</td>
+            <td>{{ c.title }}</td>
+            <td>{{ c.open_at | date:'short' }}</td>
+            <td>{{ c.close_at | date:'short' }}</td>
+            <td>
+              <span [class]="'badge ' + (c.is_active ? 'bg-success' : 'bg-secondary')">
+                {{ c.is_active ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center flex-wrap gap-1">
+
+                <!-- CREAR BASE (verde) -->
+                <button
+                  *ngIf="!c.base_created && canManage"
+                  class="btn btn-sm btn-success"
+                  (click)="createGeneralRequisition(c)">
+                  Crear Base - Áreas
+                </button>
+
+                <!-- BASE CREADA (rojo + disabled) -->
+                <button
+                  *ngIf="c.base_created && canManage"
+                  class="btn btn-sm btn-danger"
+                  disabled>
+                  Enviada a Áreas
+                </button>
+
+                <!-- EDITAR / PRODUCTOS (solo si NO hay base) -->
+                <button 
+                  *ngIf="canManage && !c.base_created" 
+                  class="btn btn-sm btn-outline-primary" 
+                  (click)="edit(c)">
+                  Editar
+                </button>
+                <button 
+                  *ngIf="canManage && !c.base_created" 
+                  class="btn btn-sm btn-outline-info" 
+                  (click)="manageProducts(c)">
+                  Productos
+                </button>
+
+                <!-- ACTIVAR/CERRAR -->
+                <button 
+                  *ngIf="canManage" 
+                  class="btn btn-sm btn-outline-warning" 
+                  (click)="toggleActive(c)">
+                  {{ c.is_active ? 'Cerrar' : 'Activar' }}
+                </button>
+
+                <!-- ELIMINAR -->
+                <button 
+                  *ngIf="canManage" 
+                  class="btn btn-sm btn-outline-danger" 
+                  (click)="deleteCall(c)">
+                  Eliminar
+                </button>
+
+              </div>
+            </td>   
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="card-body text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2">Cargando...</p>
+    </div>
+  </ng-template>
+</div>
+
+<router-outlet></router-outlet>

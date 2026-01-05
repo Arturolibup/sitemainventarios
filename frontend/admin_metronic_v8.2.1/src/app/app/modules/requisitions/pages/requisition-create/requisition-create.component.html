@@ -1,0 +1,157 @@
+<div class="card shadow-sm p-4">
+  <!-- 🔹 Encabezado -->
+  <h4 class="fw-bold text-primary mb-3 d-flex align-items-center justify-content-between">
+    <span>
+      <ng-container *ngIf="isEditMode; else createTitle">
+        ✏️ Editar Borrador de Requisición
+      </ng-container>
+      <ng-template #createTitle>
+        📝 Crear Nueva Requisición
+      </ng-template>
+
+      <span
+        class="badge bg-info ms-2"
+        *ngIf="form.get('requisition_call_id')?.value as callId"
+      >
+        Convocatoria #{{ callId }}
+      </span>
+    </span>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" routerLink="/requisitions/my">
+        ⬅️ Regresar
+      </button>
+      <button class="btn btn-outline-primary" routerLink="/dashboard">
+        <i class="fa fa-home me-2"></i>Menú Principal
+      </button>
+    </div>
+  </h4>
+
+  <!-- 🔹 Franja informativa -->
+  <div
+    *ngIf="isEditMode && savedRequisitionId"
+    class="alert alert-warning d-flex align-items-center justify-content-between"
+  >
+    <div>
+      ⚙️ Estás Creando la Requisición
+      <b>{{ requisitionTitle || 'Requisición #' + savedRequisitionId }}</b>.
+      <span class="text-muted">Guarda los cambios o envíala cuando esté lista.</span>
+    </div>
+    <div><span class="badge bg-secondary">borrador</span></div>
+  </div>
+
+  <!-- 🔹 Contenido -->
+  <ng-container *ngIf="!loading; else loadingTpl">
+    <!-- 🔹 Mostrar si no hay productos -->
+    <div
+      *ngIf="!itemsArray || itemsArray.length === 0"
+      class="alert alert-info text-center my-4"
+    >
+      <ng-container *ngIf="!isEditMode; else editModeMsg">
+        No hay convocatoria activa o no tiene productos asociados.
+      </ng-container>
+      <ng-template #editModeMsg>
+        No hay productos cargados para esta requisición.
+      </ng-template>
+    </div>
+
+    <!-- 🔹 Tabla de productos -->
+    <ng-container *ngIf="itemsArray && itemsArray.length > 0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Productos</h5>
+        <button
+          *ngIf="isEditMode"
+          type="button"
+          class="btn btn-outline-info btn-sm"
+          (click)="reloadFromCall()"
+          [disabled]="loading"
+        >
+          🔄 Recargar desde Convocatoria
+        </button>
+      </div>
+
+      <form [formGroup]="form">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered align-middle">
+            <thead class="table-primary text-center">
+              <tr>
+                <th style="width: 5%">#</th>
+                <th style="width: 40%">Producto</th>
+                <th style="width: 15%">Unidad</th>
+                <th style="width: 15%">Cantidad</th>
+                <th style="width: 25%">Notas</th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="items">
+              <tr
+                *ngFor="let item of itemsArray.controls; let i = index"
+                [formGroupName]="i"
+              >
+                <td class="text-center">{{ i + 1 }}</td>
+                <td class="fw-semibold">
+                  {{ item.get('product_name')?.value }}
+                </td>
+                <td class="text-center">
+                  {{ item.get('unit_name')?.value }}
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm text-end"
+                    formControlName="requested_qty"
+                    appNumberFormat
+                    [class.is-invalid]="item.get('requested_qty')?.invalid && item.get('requested_qty')?.touched"
+                    placeholder="0"
+                  />
+                  <div
+                    *ngIf="item.get('requested_qty')?.invalid && item.get('requested_qty')?.touched"
+                    class="invalid-feedback"
+                  >
+                    Ingresa una cantidad válida (0 o más).
+                  </div>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="notes"
+                    placeholder="Notas opcionales…"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 🔹 Botones -->
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button
+            type="button"
+            class="btn btn-outline-secondary px-4"
+            (click)="saveDraft()"
+          >
+            💾 {{ isEditMode ? 'Actualizar Borrador' : 'Guardar Borrador' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary px-4"
+            (click)="submitRequisition()"
+            [disabled]="!savedRequisitionId && isEditMode"
+          >
+            📤 Enviar Requisición
+          </button>
+        </div>
+      </form>
+    </ng-container>
+  </ng-container>
+
+  <!-- 🔹 Loader -->
+  <ng-template #loadingTpl>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 mb-0">Cargando…</p>
+    </div>
+  </ng-template>
+</div>

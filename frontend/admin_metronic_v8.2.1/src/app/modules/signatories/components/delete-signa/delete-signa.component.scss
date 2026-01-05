@@ -1,0 +1,210 @@
+:host {
+  display: block;
+}
+
+// Estilos específicos para el modal de eliminación
+.modal-content {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 0;
+  
+  .btn-active-color-primary:hover {
+    background-color: rgba(54, 153, 255, 0.1);
+  }
+}
+
+.modal-body {
+  padding: 0 1.5rem 1.5rem;
+}
+
+// Estilos para el símbolo de advertencia
+.symbol {
+  margin: 0 auto;
+  
+  .symbol-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.bg-light-danger {
+  background-color: rgba(246, 78, 96, 0.1) !important;
+}
+
+// Estilos para alertas
+.alert-danger {
+  background-color: rgba(246, 78, 96, 0.1);
+  border-color: rgba(246, 78, 96, 0.3);
+  color: #f64e60;
+  
+  i {
+    color: #f64e60;
+  }
+}
+
+// Estilos para el aviso de advertencia
+.notice {
+  &.bg-light-warning {
+    background-color: rgba(255, 168, 0, 0.1) !important;
+  }
+  
+  .border-warning {
+    border-color: rgba(255, 168, 0, 0.3) !important;
+  }
+}
+
+// Estilos para el input de confirmación
+.form-control-solid {
+  background-color: #f5f8fa;
+  border-color: #f5f8fa;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    background-color: #ffffff;
+    border-color: #3699ff;
+    box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+  }
+  
+  &.is-valid {
+    border-color: #1bc5bd;
+    background-color: rgba(27, 197, 189, 0.05);
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(27, 197, 189, 0.25);
+    }
+  }
+  
+  &.is-invalid {
+    border-color: #f64e60;
+    background-color: rgba(246, 78, 96, 0.05);
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.25);
+    }
+  }
+}
+
+// Estilos para feedback
+.valid-feedback,
+.invalid-feedback {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+// Estilos para botones
+.btn {
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.625rem;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-light {
+  background-color: #f5f8fa;
+  border-color: #f5f8fa;
+  color: #3f4254;
+  
+  &:hover:not(:disabled) {
+    background-color: #e4e6ef;
+    border-color: #e4e6ef;
+  }
+}
+
+.btn-danger {
+  background-color: #f64e60;
+  border-color: #f64e60;
+  color: #ffffff;
+  
+  &:hover:not(:disabled) {
+    background-color: #ee2d41;
+    border-color: #ee2d41;
+    box-shadow: 0 5px 15px rgba(246, 78, 96, 0.3);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: #d92134;
+    border-color: #d92134;
+    transform: translateY(1px);
+  }
+}
+
+// Estilos para el texto requerido
+.required:after {
+  content: "*";
+  color: #f64e60;
+  margin-left: 3px;
+}
+
+// Animaciones
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    min-width: auto;
+  }
+  
+  .symbol {
+    width: 80px !important;
+    height: 80px !important;
+    
+    i {
+      font-size: 1.5rem !important;
+    }
+  }
+}
+
+// Estilos para el texto del firmante
+.fw-bold.text-dark {
+  color: #181c32;
+}
+
+.text-muted {
+  color: #b5b5c3 !important;
+}
+
+// Estilos para el placeholder del input
+::placeholder {
+  color: #a1a5b7;
+  opacity: 0.7;
+}
+
+// Estilos para el spinner
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}

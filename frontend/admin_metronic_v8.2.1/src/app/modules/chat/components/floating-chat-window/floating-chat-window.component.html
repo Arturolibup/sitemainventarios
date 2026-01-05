@@ -1,0 +1,16 @@
+<div *ngIf="(ui.visible$ | async)" class="chat-window" [ngClass]="{ 'maximized': isMaximized }">
+
+  <div class="chat-header">
+    <span>Chat interno</span>
+
+    <div class="actions">
+      <button class="action-btn" type="button" (click)="maximize()">⬜</button>
+      <button class="close-btn" type="button" (click)="close()">✖</button>
+    </div>
+  </div>
+
+  <div class="chat-body">
+    <app-chat-panel></app-chat-panel>
+  </div>
+
+</div>

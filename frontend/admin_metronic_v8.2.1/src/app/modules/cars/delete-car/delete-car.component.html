@@ -1,0 +1,24 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h2 class="fw-bolder">Eliminar Vehículo</h2>
+    <button type="button" class="btn-close" (click)="modal.dismiss()" aria-label="Cerrar"></button>
+  </div>
+  <div class="modal-body text-center py-10">
+    <i class="ki-duotone ki-trash fs-3x text-danger mb-5">
+      <span class="path1"></span><span class="path2"></span>
+      <span class="path3"></span><span class="path4"></span>
+      <span class="path5"></span>
+    </i>
+    <h3 class="fw-bold mb-3">¿Estás seguro de eliminar el vehículo {{ vehicle.numero_eco }}?</h3>
+    
+  </div>
+  <div class="modal-footer justify-content-center">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()" [disabled]="isLoading">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isLoading">
+      <span *ngIf="!isLoading" class="indicator-label">Eliminar</span>
+      <span *ngIf="isLoading" class="indicator-progress">
+        Cargando... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+      </span>
+    </button>
+  </div>
+</div>

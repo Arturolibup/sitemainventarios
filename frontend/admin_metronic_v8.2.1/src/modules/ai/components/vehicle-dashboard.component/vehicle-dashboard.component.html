@@ -1,0 +1,423 @@
+<div class="vehicle-dashboard-wrapper">
+
+  <!-- LOADER SUPERIOR -->
+  <div class="mb-4" *ngIf="(isLoading$ | async)">
+    <div class="alert alert-info d-flex align-items-center">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Cargando información del dashboard de vehículos...
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card mb-5">
+    <div class="card-header align-items-center border-0 pt-4">
+      <h3 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold fs-3 mb-1">Filtros</span>
+        <span class="text-muted fw-semibold fs-7">
+          Refina el análisis por periodo, área, vehículo, proveedor, etc.
+        </span>
+      </h3>
+      <div class="card-toolbar">
+        <button class="btn btn-light btn-sm me-2" (click)="onResetFilters()">
+          <i class="bi bi-eraser me-1"></i> Limpiar
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="onApplyFilters()">
+          <i class="bi bi-funnel me-1"></i> Aplicar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body pt-3">
+      <form [formGroup]="filtersForm" class="row g-3">
+
+        <!-- Fecha desde / hasta -->
+        <div class="col-md-3">
+          <label class="form-label">Fecha desde</label>
+          <input type="date" class="form-control" formControlName="fecha_desde" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha hasta</label>
+          <input type="date" class="form-control" formControlName="fecha_hasta" />
+        </div>
+
+        <!-- Año / Mes -->
+        <div class="col-md-2">
+          <label class="form-label">Año</label>
+          <select class="form-select" formControlName="anio">
+            <option value="">-- Seleccionar año --</option>
+            <option *ngFor="let y of yearsList" [value]="y">{{ y }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Mes</label>
+          <select class="form-select" formControlName="mes">
+            <option value="">-- Seleccionar mes --</option>
+            <option *ngFor="let m of mesesList" [value]="m.value">{{ m.label }}</option>
+          </select>
+        </div>
+
+        <!-- Área / Subárea (Tagify) -->
+        <div class="col-md-3">
+          <label class="form-label">Área</label>
+          <input
+            #areaInput
+            type="text"
+            class="form-control"
+            formControlName="area"
+            placeholder="Escribe y selecciona un área"
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Subárea</label>
+          <input
+            #subareaInput
+            type="text"
+            class="form-control"
+            formControlName="subarea"
+            placeholder="Escribe y selecciona una subárea"
+          />
+        </div>
+
+        <!-- Vehículo (Tagify por número económico) -->
+        <div class="col-md-3">
+          <label class="form-label">Número económico</label>
+          <input
+            #numeroEcoInput
+            type="text"
+            class="form-control"
+            formControlName="numero_eco"
+            placeholder="Escribe y selecciona un vehículo"
+          />
+        </div>
+
+        <!-- Partida / proveedor (Tagify para proveedor) -->
+        <div class="col-md-3">
+          <label class="form-label">Partida</label>
+          <input
+            #partidaInput
+            type="text"
+            class="form-control"
+            formControlName="partida"
+            placeholder="Ej. 232"
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Proveedor</label>
+          <input
+            #providerInput
+            type="text"
+            class="form-control"
+            formControlName="proveedor_nombre"
+            placeholder="Escribe y selecciona proveedor"
+          />
+        </div>
+
+        <!-- Producto / marca refacción (Tagify en ambos) -->
+        <div class="col-md-4">
+          <label class="form-label">Producto / descripción</label>
+          <input
+            #productInput
+            type="text"
+            class="form-control"
+            formControlName="producto"
+            placeholder="Escribe y selecciona producto/refacción"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Marca refacción</label>
+          <input
+            #marcaRefaccionInput
+            type="text"
+            class="form-control"
+            formControlName="marca_refaccion"
+            placeholder="Escribe y selecciona marca de refacción"
+          />
+        </div>
+
+        <!-- Marca / tipo vehículo (Tagify) -->
+        <div class="col-md-4">
+          <label class="form-label">Marca vehículo</label>
+          <input
+            #marcaVehiculoInput
+            type="text"
+            class="form-control"
+            formControlName="marca_vehiculo"
+            placeholder="Escribe y selecciona marca de vehículo"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tipo vehículo</label>
+          <input
+            #tipoVehiculoInput
+            type="text"
+            class="form-control"
+            formControlName="tipo_vehiculo"
+            placeholder="Escribe y selecciona tipo de vehículo"
+          />
+        </div>
+
+        <!-- Rango importe -->
+        <div class="col-md-2">
+          <label class="form-label">Importe mín.</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="importe_min"
+          />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Importe máx.</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="importe_max"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- KPIs + BOTÓN PDF -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold mb-0">Resumen de refacciones por vehículo</h3>
+    <button class="btn btn-outline-secondary btn-sm" (click)="downloadPdf()">
+      <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF
+    </button>
+  </div>
+
+  <div class="row g-4 mb-5" *ngIf="summary">
+    <div class="col-md-3">
+      <div class="card card-kpi bg-light-primary">
+        <div class="card-body">
+          <span class="fs-7 text-muted">Gasto total</span>
+          <div class="fs-3 fw-bold mt-2">
+            {{ formatCurrency(summary?.kpis?.gasto_total) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card card-kpi bg-light-success">
+        <div class="card-body">
+          <span class="fs-7 text-muted">Vehículos con refacciones</span>
+          <div class="fs-3 fw-bold mt-2">
+            {{ summary?.kpis?.vehiculos_con_refacciones || 0 }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card card-kpi bg-light-warning">
+        <div class="card-body">
+          <span class="fs-7 text-muted">Líneas registradas</span>
+          <div class="fs-3 fw-bold mt-2">
+            {{ summary?.kpis?.total_lineas || 0 }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3" *ngIf="summary?.kpis?.vehiculo_mas_costoso">
+      <div class="card card-kpi bg-light-danger">
+        <div class="card-body">
+          <span class="fs-7 text-muted">Vehículo más costoso</span>
+          <div class="fs-6 fw-bold mt-2">
+            {{ summary?.kpis?.vehiculo_mas_costoso?.numero_eco }}
+            ({{ summary?.kpis?.vehiculo_mas_costoso?.vehiculo_placa }})
+          </div>
+          <div class="fs-6 mt-1">
+            {{ formatCurrency(summary?.kpis?.vehiculo_mas_costoso?.total) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICAS + INSIGHTS IA -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Gasto mensual</h3>
+        </div>
+        <div class="card-body chart-container">
+          <canvas
+            #monthlyChartCanvas
+            *ngIf="summary?.charts?.monthly?.length"
+          ></canvas>
+          <div *ngIf="!summary?.charts?.monthly?.length" class="text-muted">
+            No hay datos suficientes para mostrar la gráfica mensual.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Análisis IA</h3>
+        </div>
+        <div class="card-body">
+          <p class="fs-7 text-muted mb-2">
+            Comentario ejecutivo IA sobre el periodo y filtros seleccionados:
+          </p>
+          <div class="analysis-wrapper">
+            <pre>{{ iaSummaryText }}</pre>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP VEHÍCULOS & TOP ÁREAS -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Top vehículos por gasto</h3>
+        </div>
+        <div class="card-body chart-container">
+          <canvas
+            #topVehiclesChartCanvas
+            *ngIf="summary?.charts?.top_vehicles?.length"
+          ></canvas>
+          <div
+            *ngIf="!summary?.charts?.top_vehicles?.length"
+            class="text-muted"
+          >
+            No hay datos suficientes para mostrar el Top vehículos.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Top áreas por gasto</h3>
+        </div>
+        <div class="card-body chart-container">
+          <canvas
+            #topAreasChartCanvas
+            *ngIf="summary?.charts?.top_areas?.length"
+          ></canvas>
+          <div *ngIf="!summary?.charts?.top_areas?.length" class="text-muted">
+            No hay datos suficientes para mostrar el Top áreas.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLAS: productos frecuentes & vehículos costosos -->
+  <div class="row g-4 mb-5" *ngIf="tables">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Productos / refacciones más frecuentes</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-row-dashed align-middle mb-0">
+              <thead>
+                <tr class="fw-bold text-muted">
+                  <th>Producto</th>
+                  <th class="text-end">Veces</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of tables?.productos_frecuentes">
+                  <td>{{ p.producto }}</td>
+                  <td class="text-end">{{ p.veces }}</td>
+                  <td class="text-end">{{ formatCurrency(p.total) }}</td>
+                </tr>
+                <tr *ngIf="!tables?.productos_frecuentes?.length">
+                  <td colspan="3" class="text-center text-muted py-4">
+                    No se encontraron productos frecuentes para los filtros
+                    aplicados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Vehículos más costosos</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-row-dashed align-middle mb-0">
+              <thead>
+                <tr class="fw-bold text-muted">
+                  <th>Vehículo</th>
+                  <th>Placa</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let v of tables?.vehiculos_costosos">
+                  <td>{{ v.numero_eco || 'N/D' }}</td>
+                  <td>{{ v.vehiculo_placa || 'N/D' }}</td>
+                  <td class="text-end">{{ formatCurrency(v.total) }}</td>
+                </tr>
+                <tr *ngIf="!tables?.vehiculos_costosos?.length">
+                  <td colspan="3" class="text-center text-muted py-4">
+                    No se encontraron vehículos costosos para los filtros
+                    aplicados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLE -->
+  <div class="card mb-5" *ngIf="detail?.data?.length">
+    <div class="card-header">
+      <h3 class="card-title">Detalle de líneas</h3>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-row-dashed align-middle mb-0">
+          <thead>
+            <tr class="fw-bold text-muted">
+              <th>Fecha</th>
+              <th>Vehículo</th>
+              <th>Placa</th>
+              <th>Área</th>
+              <th>Producto</th>
+              <th class="text-end">Cantidad</th>
+              <th class="text-end">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of detail.data">
+              <td>{{ r.fecha_op | date: 'yyyy-MM-dd HH:mm' }}</td>
+              <td>{{ r.numero_eco }}</td>
+              <td>{{ r.vehiculo_placa }}</td>
+              <td>{{ r.area_nombre }}</td>
+              <td>{{ r.producto }}</td>
+              <td class="text-end">{{ r.cantidad }}</td>
+              <td class="text-end">{{ formatCurrency(r.amount) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Paginación simple (se puede mejorar después) -->
+      <div class="p-3 text-end text-muted">
+        Página {{ detail.current_page }} de {{ detail.last_page }}
+      </div>
+    </div>
+  </div>
+</div>

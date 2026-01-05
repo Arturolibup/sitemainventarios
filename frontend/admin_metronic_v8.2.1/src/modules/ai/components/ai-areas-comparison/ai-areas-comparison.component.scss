@@ -1,0 +1,40 @@
+.dashboard-container {
+  padding: 1rem;
+}
+
+.kpi-card {
+  transition: transform 0.3s;
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.card {
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  margin-bottom: 1.5rem;
+  .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+  }
+}
+
+.table {
+  th {
+    border-top: none;
+    background-color: #f8f9fc;
+  }
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.list-group-item {
+  border-left: 3px solid #e74a3b;
+  &:nth-child(2n) {
+    border-left-color: #f6c23e;
+  }
+  &:nth-child(3n) {
+    border-left-color: #1cc88a;
+  }
+}

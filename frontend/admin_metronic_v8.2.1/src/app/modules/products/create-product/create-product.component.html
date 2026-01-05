@@ -1,0 +1,222 @@
+<div class="d-flex flex-column flex-column-fluid">
+    <!--begin::Toolbar-->
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+        <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+            <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">Registro de Producto</h1>
+            </div>
+        </div>
+    </div>
+    <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+    <!--end::Toolbar-->
+
+    <!--begin::Content-->
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            <form id="kt_product_form" class="form d-flex flex-column flex-lg-row gap-7" (ngSubmit)="store()">
+                <!-- Columna izquierda compacta -->
+                <div class="d-flex flex-column gap-7 w-100 w-lg-250px" style=" flex-shrink: 0">
+                    <!-- Sección imagen compacta -->
+                    <div class="card card-flush py-4" style="min-height:250px;">
+                        <!--begin::Card header-->
+                        <div class="card-header">
+                            <!--begin::Card title-->
+                            <div class="card-title">
+                                <h2>Imagen</h2>
+                            </div>
+                        </div>
+                        <!--end::Card header-->
+                    
+                        <!--begin::Card body-->
+                        <div class="card-body text-center pt-0">
+                            <!--begin::Image input-->
+                            <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3" 
+                                [ngStyle]="{'background-image': 'url(' + imagen_previzualiza + ')', 'background-size': 'contain', 'background-repeat': 'no-repeat', 'background-position': 'center'}"
+                                data-kt-image-input="true">
+                                <!--begin::Preview existing avatar-->
+                                <div class="image-input-wrapper w-150px h-150px"></div>
+                                <!--end::Preview existing avatar-->
+                    
+                                <!--begin::Label-->
+                                <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Cambiar avatar" data-bs-original-title="Change avatar" data-kt-initialized="1">
+                                    <i class="ki-duotone ki-pencil fs-7"><span class="path1"></span><span class="path2"></span></i>
+                                    <!--begin::Inputs-->
+                                    <input type="file" #imageInput name="producto_imagen" accept=".png, .jpg, .jpeg" (change)="processFile($event)">
+                                    <input type="hidden" name="imagen_remove">
+                                    <!--end::Inputs-->
+                                </label>
+                                <!--end::Label-->
+                    
+                                <!--begin::Cancel-->
+                                <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" aria-label="Cancel avatar" data-bs-original-title="Cancel avatar" data-kt-initialized="1">
+                                    <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                </span>
+                                <!--end::Cancel-->
+                    
+                                <!--begin::Remove-->
+                                <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="remove" data-bs-toggle="tooltip" aria-label="Remove avatar" data-bs-original-title="Remove avatar" data-kt-initialized="1">
+                                    <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                </span>
+                                <!--end::Remove-->
+                            </div>
+                            <!--end::Image input-->
+                    
+                            <!--begin::Description-->
+                            <div class="text-muted fs-7">Imagen en miniatura del producto. Solo archivos *.png, *.jpg y *.jpeg</div>
+                            <!--end::Description-->
+                        </div>
+                        <!--end::Card body-->
+                    </div>
+
+                    <!-- Inventario compacto -->
+                    <div class="card card-flush py-4" style="min-height: 250px;">
+                        <div class="card-header">
+                            <h3 class="card-title fs-5">Inventario</h3>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="mb-4">
+                                <label class="form-label required">Umbral Mínimo</label>
+                                <input type="number" name="umbral" [(ngModel)]="umbral" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label required">Clave</label>
+                                <input type="text" name="clave" [(ngModel)]="clave" class="form-control form-control-sm" readonly>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label required">Unidad</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="unit_warehouse" name="unit_warehouse" required>
+                                    <ng-container *ngFor="let UN of UNITS">
+                                        <option [value]="UN.id">{{UN.name}}</option>
+                                    </ng-container>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label required">Cantidad</label>
+                                <input type="text" name="quantity_warehouse" [(ngModel)]="quantity_warehouse" [ngModel]="formattedQuantity" (ngModelChange)="validateQuantityInput($event)" (blur)="formatQuantity($event)" class="form-control form-control-sm" min="0" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label required">Almacén</label>
+                                <input type="text" value="Central Aguamilpa" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha principal -->
+                <div class="d-flex flex-column flex-row-fluid gap-7">
+                    <!-- Información General -->
+                    <div class="card card-flush py-4">
+                        <div class="card-header">
+                            <h2 class="card-title fs-3">Información General</h2>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="row g-5 mb-8">
+                                <div class="col-md-12">
+                                    <label class="form-label required">Título</label>
+                                    <input type="text" [(ngModel)]="title" name="title" (input)="title = title.toUpperCase(); generateClave(title)" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">SKU/CLAVE/CODIGO</label>
+                                    <input type="text" [(ngModel)]="sku" name="sku" (input)="sku = sku.toUpperCase()" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Precio General sin IVA</label>
+                                    <input type="text" (blur)="formatPrice()" (input)="validateNumberInput($event)" [(ngModel)]="price_general" name="price_general" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" [(ngModel)]="description" rows="3" name="description" (input)="description = description.toUpperCase()" required></textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Marca del Producto</label>
+                                <textarea class="form-control" [(ngModel)]="specifications" rows="1" name="specifications" (input)="specifications = specifications.toUpperCase()"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                       
+                    <div class="row g-5">
+                        <!-- Columna Categoría -->
+                        <div class="col-md-6">
+                            <div class="card card-flush h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title fs-5">Categoría</h3>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <label class="form-label required">Seleccionar Categoría</label>
+                                    <select class="form-select form-select-sm" [(ngModel)]="product_categorie_id" name="product_categorie_id" 
+                                        (ngModelChange)="onCategoriaChange()" required>
+                                        <ng-container *ngFor="let CATEGORI of CATEGORIES">
+                                            <option [value]="CATEGORI.id">{{CATEGORI.name}}</option>
+                                        </ng-container>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Columna Reposición -->
+                        <div class="col-md-6">
+                            <div class="card card-flush h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title fs-5">Reposición</h3>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <label class="form-label required">Tiempo de Reposición</label>
+                                    <input type="number" [(ngModel)]="tiempo_de_entrega" name="tiempo_de_entrega" class="form-control form-control-sm" min="0" required>
+                                    <div class="text-muted fs-8 mt-1">Días hábiles</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Marca</label>
+                            <select name="marca_id" [(ngModel)]="marca_id" (ngModelChange)="onMarcaChange()" class="form-control" required>
+                                <option value="">Seleccione Marca</option>
+                                <option *ngFor="let marca of marcas" [value]="marca.id">{{ marca.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Tipo</label>
+                            <select name="tipo_id" [(ngModel)]="tipo_id" class="form-control" required>
+                                <option value="">Seleccione Tipo</option>
+                                <option *ngFor="let tipo of tipos" [value]="tipo.id">{{ tipo.nombre }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Modelo</label>
+                            <select name="modelo" [(ngModel)]="modelo" class="form-control" required>
+                                <option value="">Seleccione Año</option>
+                                <option *ngFor="let year of modelYears" [value]="year">{{ year }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Número Económico</label>
+                            <input type="number" name="numeroeco" [(ngModel)]="numeroeco" class="form-control" required />
+                        </div>
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Placa</label>
+                            <input type="text" name="placa" [(ngModel)]="placa" class="form-control" (input)="placa = placa.toUpperCase()" required />
+                        </div>
+                        <div class="col-md-6" *ngIf="showAutomotrizFields">
+                            <label class="form-label required">Cilindraje</label>
+                            <input type="number" name="cilindro" [(ngModel)]="cilindro" class="form-control" required />
+                        </div>
+                    </div>
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-end gap-3">
+                        <button type="button" (click)="Limpiarform()" class="btn btn-light">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+                            <span class="indicator-label">Guardar</span>
+                            <span class="indicator-progress">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

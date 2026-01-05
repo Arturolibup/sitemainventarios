@@ -1,0 +1,106 @@
+<div class="d-flex flex-column flex-root">
+  <div class="content d-flex flex-column flex-column-fluid">
+    <div class="d-flex flex-column-fluid">
+      <div class="container-fluid">
+        <div class="card card-custom">
+          <div class="card-header">
+            <div class="card-title">
+              <h3 class="card-label mb-0">Recepción de Órdenes (Área 3)</h3>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <!-- BUSCADOR -->
+            <div class="form-group">
+              <input
+                class="form-control"
+                type="text"
+                placeholder="Buscar por folio, número de orden, proveedor..."
+                [value]="query"
+                (input)="onSearchChange($any($event.target).value)"
+              />
+            </div>
+
+            <!-- TABLA -->
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr class="bg-light">
+                    <th>Folio SF</th>
+                    <th>No. Orden</th>
+                    <th>Proveedor</th>
+                    <th>Fecha</th>
+                    <th>Estatus</th>
+                    <th class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let order of orders; trackBy: trackByOrder">
+                    <td>{{ order.foliosf || '—' }}</td>
+                    <td>{{ order.order_number || '—' }}</td>
+                    <td>{{ order.provider?.full_name || '—' }}</td>
+                    <td>{{ order.date ? (order.date | date:'yyyy-MM-dd') : '—' }}</td>
+                    <td>
+                      <span [class]="getSemaforoClass(order.status)">
+                        {{ getStatusLabel(order.status) }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button class="btn btn-primary btn-sm" (click)="goToReceive(order)">
+                        <i class="bi bi-box-seam mr-1"></i> Recibir
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- VACÍO -->
+                  <tr *ngIf="!isLoading && orders.length === 0">
+                    <td colspan="6" class="text-center py-10">No hay órdenes para recibir</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- PAGINACIÓN -->
+            <div class="d-flex justify-content-end mt-4" *ngIf="total > itemsPerPage">
+              <nav>
+                <ul class="pagination mb-0">
+                  <li class="page-item" [class.disabled]="page <= 1">
+                    <button class="page-link" (click)="onPageChange(page - 1)" [disabled]="page <= 1">
+                      Anterior
+                    </button>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link">{{ page }}</span>
+                  </li>
+                  <li class="page-item" [class.disabled]="(page * itemsPerPage) >= total">
+                    <button
+                      class="page-link"
+                      (click)="onPageChange(page + 1)"
+                      [disabled]="(page * itemsPerPage) >= total"
+                    >
+                      Siguiente
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+            <!-- LOADER -->
+            <div *ngIf="isLoading" class="text-center py-10">
+              <span class="spinner-border"></span>
+              <div class="mt-2">Cargando...</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Estilo opcional si tu tema no tiene .badge-orange -->
+        <style>
+          .badge-orange { background-color: #e67e22; color: #fff; }
+        </style>
+
+      </div>
+    </div>
+  </div>
+</div>

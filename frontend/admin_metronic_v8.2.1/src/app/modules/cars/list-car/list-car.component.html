@@ -1,0 +1,155 @@
+<div class="card" >
+    <!-- Card Header -->
+    <div class="card-header border-0 pt-6">
+      <!-- Card Title -->
+      <div class="card-title">
+        <!-- Search Input -->
+        <div class="d-flex align-items-center position-relative my-1 gap-3" style="position: relative;"> 
+          <i class="ki-duotone ki-magnifier fs-3"
+             style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #555;">
+            <span class="path1"></span><span class="path2"></span>
+          </i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" (keyup.enter)="searchVehicles()"
+            name="search" 
+            class="form-control form-control-solid w-350px ps-12" 
+            placeholder="Buscar Vehículo"
+            style="padding-left: 40px; border: 1px solid #ccc; color: #000;"
+          />
+          <!-- Search Button -->
+          <button type="button" class="btn btn-primary" (click)="searchVehicles()">
+            Buscar
+            <span class="spinner-border spinner-border-sm align-middle ms-2" 
+            *ngIf="(isLoading$ | async) && isLoading"></span>
+          </button>
+          <!-- Refresh Button -->
+          <button type="button" class="btn btn-primary" (click)="refreshVehicles()">
+            Refrescar
+          </button>
+        </div>
+      </div>
+  
+      <!-- Card Toolbar -->
+      <div class="card-toolbar">
+        <div class="d-flex justify-content-end">
+          <!-- Add Role Button -->
+          <button type="button" class="btn btn-primary" (click)="createVehicle()">
+            + Agregar Vehículo
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Card Body -->
+    <div class="card-body pt-0">
+      <!-- Table -->
+      <div id="kt_customers_table_wrapper" class="dt-container dt-boostrap5 dt-empty-footer">
+        <div class="table-responsive"> 
+          <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable" id="kt_customers_table"
+            style = "width : 1199.5 px;">
+            <thead>
+              <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0" role="row">
+
+                <th class="min-w-100px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan ="1"
+                  colspan ="1" aria label= "Imagen; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Imagen</span>
+                <span class="dt-column-order"></span>
+                  
+                <th class="min-w-100px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="2" rowspan ="1"
+                  colspan ="1" aria label= "Número Económico; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">No. Económico</span>
+                <span class="dt-column-order"></span>
+                
+                <th class="min-w-100px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="3" rowspan ="1"
+                  colspan ="1" aria label= "Placa; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Placa</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-100px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="4" rowspan ="1"
+                  colspan ="1" aria label= "Marca; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Marca</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-150px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="5" rowspan ="1"
+                  colspan ="1" aria label= "Tipo/Modelo; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Tipo/Modelo</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-200px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="6" rowspan ="1"
+                  colspan ="1" aria label= "Subárea; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Subárea</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-200px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="7" rowspan ="1"
+                  colspan ="1" aria label= "Área; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Área</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-80px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="8" rowspan ="1"
+                  colspan ="1" aria label= "Estado; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Estado</span>
+                <span class="dt-column-order"></span>
+
+                <th class="min-w-150px text-center dt-orderable-asc dt-orderable-desc" data-dt-column="9" rowspan ="1"
+                  colspan ="1" aria label= "Acciones; Activate to sort" tabindex= "0">
+                <span class=" dt-column-title" role="button">Acciones</span>
+                <span class="dt-column-order"></span>
+                
+              </tr>
+            </thead> 
+            <tbody class="fw-semibold text-gray-600">
+              <!-- Loop through vehicles -->
+                <ng-container *ngFor="let vehicle of vehicles">
+                  <tr>
+                      <td class="text-center">
+                          <div class="symbol symbol-250px me-5 text-center">
+                            <img [src]="vehicle?.imagen_vehiculo " alt="Imagen">
+                          </div>
+                      </td>
+                      <td class="text-center">{{ vehicle.numero_eco }}</td>
+                      <td class="text-center">{{ vehicle.placa || '-' }}</td>
+                      <td class="text-center">{{ vehicle.marca?.nombre || '-' }}</td>
+                      <td class="text-center">{{ vehicle.tipo?.nombre }} - {{ vehicle.modelo || '-' }}</td>
+                      <td class="text-center">{{ vehicle.subarea?.name || '-' }}</td>
+                      <td class="text-center">{{ vehicle.subarea?.area?.name || '-' }}</td>
+                      <td class = "text-center">
+                          <span class="badge badge-light-success text-center" *ngIf="vehicle.state ==1">Activo</span>
+                          <span class="badge badge-light-danger text-center" *ngIf="vehicle.state ==0">Inactivo</span>
+                      </td>
+
+                      <!-- Eliminada la columna de fecha -->
+
+                    <!-- Edit Button -->
+                    <td class="text-center">
+                      <a href="#" onclick="return false;" (click)="editVehicle(vehicle.id)" 
+                         class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                          <i class="ki-duotone ki-pencil fs-2">
+                              <span class="path1"></span><span class="path2"></span>
+                          </i>
+                      </a>
+                      <a href="#" onclick="return false;" (click)="deleteVehicle(vehicle)"  
+                         class="btn btn-icon btn-bg-light btn-active-light-primary btn-sm">
+                          <i class="ki-duotone ki-trash fs-2">
+                              <span class="path1"></span><span class="path2"></span>
+                              <span class="path3"></span><span class="path4"></span>
+                              <span class="path5"></span>
+                          </i>
+                      </a>
+                  </td>
+                  </tr>
+                </ng-container> 
+              </tbody>
+          </table>
+        </div>
+      <!-- Pagination -->
+      <ngb-pagination 
+        [collectionSize]="totalPages * perPage" 
+        [(page)]="currentPage" 
+        [pageSize]="perPage" 
+        [rotate]="true" 
+        [boundaryLinks]="true" 
+        (pageChange)="loadPage($event)">
+      </ngb-pagination>
+    </div>
+  </div>

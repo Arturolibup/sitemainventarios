@@ -1,0 +1,243 @@
+
+  <!--begin::Toolbar-->
+    <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+      <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+        <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+          Listado de Entradas de Productos
+        </h1>
+      </div>
+    </div>
+  
+  <!--end::Toolbar-->
+
+  <!--begin::Content-->
+  <div id="kt_app_content" class="app-content flex-column-fluid">
+    
+      <div class="card" style="margin: 20px;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px;">
+          <h3 style="margin: 10; font-size: 1.5rem;">Busquedas</h3>
+          <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+          <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Inicio de Fecha:</label>
+              <input
+                type="date"
+                class="form-control"
+                [(ngModel)]="dateFromSearch"
+                (ngModelChange)="onDateFromSearch()"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+              />
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Término de Fecha:</label>
+              <input
+                type="date"
+                class="form-control"
+                [(ngModel)]="dateToSearch"
+                (ngModelChange)="onDateToSearch()"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+              />
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Buscar por factura:</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="invoiceSearch"
+                (input)="onInvoiceSearch($event)"
+                placeholder="Introduce datos"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+                maxlength="15"
+              />
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Buscar por OP:</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="orderSearch"
+                (input)="onOrderSearch($event)"
+                placeholder="Introduce datos"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+                maxlength="15"
+              />
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Buscar por Proceso:</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="processSearch"
+                (input)="onProcess($event)"
+                placeholder="Introduce datos"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+                maxlength="15"
+              />
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Buscar por proveedor:</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="providerSearch"
+                (input)="onProviderSearch($event)"
+                placeholder="Introduce datos"
+                style="width: 100%; border-radius: 4px; font-size: 0.9rem;"
+              />
+            </div>
+            <!-- Nuevo filtro de estado de documentación -->
+            <div class="input-group" style="flex: 1; min-width: 120px; max-width: 150px; display: flex; align-items: center;">
+              <label style="font-size: 0.9rem; margin-right: 5px; white-space: nowrap;">Estado Documentación:</label>
+              <select
+                  [(ngModel)]="documentStatusFilter"
+                  (change)="onDocumentStatusFilterChange()"
+                  style="padding: 5px; border-radius: 4px; font-size: 0.9rem; width: 100%;"
+              >
+                  <option value="all">Todos</option>
+                  <option value="withDocuments">Con Documentación</option>
+                  <option value="withoutDocuments">Sin Documentación</option>
+              </select>
+          </div>
+            <button
+              class="btn btn-secondary"
+              (click)="clearFilters()"
+              style="padding: 12px 24px; font-size: 1rem; line-height: 1; white-space: nowrap; margin-right: 10px;"
+            >
+              Limpiar campos
+            </button>
+          </div>
+          
+        </div>
+
+        <div class="card-body" style="padding: 10px;">
+          <div *ngIf="isLoading" class="text-center" style="padding: 20px;">
+            <div class="spinner-border" role="status">
+              <span class="sr-only">Cargando...</span>
+            </div>
+          </div>
+          <div *ngIf="!isLoading && hasActiveFilters()" class="alert alert-info" style="margin-bottom: 10px; font-size: 0.9rem;">
+            Mostrando resultados filtrados. <a href="javascript:void(0)" (click)="clearFilters()" style="color: #0056b3;">Limpiar filtros</a>
+          </div>
+          <table class="table table-striped" *ngIf="!isLoading" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 10%; padding: 8px; border: 1px solid #ddd;">Factura</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 15%; padding: 8px; border: 1px solid #ddd;">Proveedor</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 10%; padding: 8px; border: 1px solid #ddd;">Fecha de Entrada</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 15%; padding: 8px; border: 1px solid #ddd;">Procesos</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 15%; padding: 8px; border: 1px solid #ddd;">Orden Pedido</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 10%; padding: 8px; border: 1px solid #ddd;">Documentos Oficiales</th>
+                <th style="vertical-align: middle; font-weight: bold; text-align: center; width: 5%; padding: 8px; border: 1px solid #ddd;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let entry of entries">
+                <td style="vertical-align: middle; text-align: center; padding: 8px; ">{{ entry.invoice_number }}</td>
+                <td style="vertical-align: middle; text-align: center; padding: 8px; ">{{ entry.provider?.full_name || 'N/A' }}</td>
+                <td style="vertical-align: middle; text-align: center; padding: 8px; ">{{ entry.entry_date | date:'dd/MM/yyyy' }}</td>
+                <td style="vertical-align: middle; text-align: center; padding: 8px; ">{{ entry.process }}</td>
+                <td style="vertical-align: middle; text-align: center; padding: 8px; ">{{ entry.order_number }}</td>
+                <td style="vertical-align: middle; text-align: center; padding: 5px;  white-space: nowrap;">
+                  <!-- Indicador visual de estado de documentación -->
+                  <span *ngIf="entry.hasDocuments" class="me-2" style="display: inline-block; vertical-align: middle;" title="Documentación oficial subida">
+                    <i class="ki-duotone ki-check fs-2" style="color: green;">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                </span>
+                <span *ngIf="!entry.hasDocuments" class="me-2" style="display: inline-block; vertical-align: middle;" title="Sin documentación oficial">
+                    <i class="ki-duotone ki-cross fs-2" style="color: red;">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                </span>
+                <a (click)="editEntry(entry.id)" 
+                  [routerLink]="['/product-entries/list-purchase-documents', entry.id]" 
+                  [queryParams]="{ invoice: entry.invoice_number }" 
+                  class="btn btn-info" 
+                  style="display: inline-block; width: 80px; padding: 5px; margin-right: 5px; font-size: 0.9rem; position: relative;">
+                    Ver
+                    <span *ngIf="entry.officialDocumentsCount > 0" style="position: absolute; top: -10px; right: -10px; background-color: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
+                        {{ entry.officialDocumentsCount }}
+                    </span>
+                </a>
+                <a  
+                [routerLink]="['/product-entries/create-purchase-documents']" 
+                [queryParams]="{ entry_id: entry.id, invoice: entry.invoice_number }"
+                class="btn btn-primary" style="display: inline-block; width: 80px; padding: 5px; font-size: 0.9rem;">
+                    Agregar
+                </a>
+            </td>
+                <td style="vertical-align: middle; text-align: center; padding: 8px; white-space: nowrap;">
+                  <a
+                    [routerLink]="['/product-entries/edit', entry.id]"
+                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1"
+                    title="Editar"
+                  >
+                    <i class="ki-duotone ki-pencil fs-2">
+                      <span class="path1"></span><span class="path2"></span>
+                    </i>
+                  </a>
+                  <a
+                    href="#"
+                    onclick="return false;"
+                    (click)="deleteEntry(entry.id)"
+                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm"
+                    title="Borrar"
+                  >
+                    <i class="ki-duotone ki-trash fs-2">
+                      <span class="path1"></span><span class="path2"></span>
+                      <span class="path3"></span><span class="path4"></span>
+                      <span class="path5"></span>
+                    </i>
+                  </a>
+                  <button (click)="downloadPdf(entry.id)" 
+                  class="btn btn-icon btn-bg-light btn-active-color-info btn-sm"
+                  title="Imprimir">
+                  
+                    <i class="ki-duotone ki-file fs-2">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!isLoading && entries.length === 0" class="text-center" style="padding: 20px;">
+            <p>No hay entradas para mostrar.</p>
+          </div>
+          <nav aria-label="Page navigation" *ngIf="!isLoading && totalPages > 1" style="margin-top: 10px;">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" (click)="loadEntries(currentPage - 1)" style="cursor: pointer;">Anterior</a>
+              </li>
+              <li class="page-item" *ngFor="let page of getPages()" [class.active]="currentPage === page">
+                <a
+                  class="page-link"
+                  (click)="loadEntries(page)"
+                  [ngStyle]="{'cursor': 'pointer', 'background-color': currentPage === page ? '#007bff' : '', 'color': currentPage === page ? 'white' : ''}"
+                >
+                  {{ page }}
+                </a>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <a class="page-link" (click)="loadEntries(currentPage + 1)" style="cursor: pointer;">Siguiente</a>
+              </li>
+            </ul>
+            <div style="display: flex; align-items: center; gap: 5px; justify-content: center; margin-top: 10px;">
+              <label style="margin: 0; font-size: 0.9rem;">Entradas por página:</label>
+              <select
+                [(ngModel)]="perPage"
+                (change)="onPerPageChange()"
+                style="padding: 5px; border-radius: 4px; font-size: 0.9rem;"
+              >
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+              </select>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+ 
+  <!--end::Content-->

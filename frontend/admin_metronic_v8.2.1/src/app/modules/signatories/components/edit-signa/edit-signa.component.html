@@ -1,0 +1,157 @@
+<!--begin::Modal content EDIT-->
+<div class="modal-content">
+  <!--begin::Modal header-->
+  <div class="modal-header" id="kt_modal_edit_signatory_header">
+    <!--begin::Modal title-->
+    <h2 class="fw-bolder">
+      <i class="ki-duotone ki-pencil fs-2 text-primary me-2">
+        <span class="path1"></span>
+        <span class="path2"></span>
+      </i>
+      Editar Firmante
+    </h2>
+    <!--end::Modal title-->
+    <!--begin::Close-->
+    <div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close" (click)="modal.dismiss()">
+      <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+      <span class="svg-icon svg-icon-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+          <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+        </svg>
+      </span>
+      <!--end::Svg Icon-->
+    </div>
+    <!--end::Close-->
+  </div>
+  <!--end::Modal header-->
+  
+  <!--begin::Modal body-->
+  <div class="modal-body">
+    <!--begin::Form-->
+    <form #signaForm="ngForm" (ngSubmit)="update()">
+      <!--begin::Scroll-->
+      <div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_edit_signatory_scroll" 
+           data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" 
+           data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_edit_signatory_header" 
+           data-kt-scroll-wrappers="#kt_modal_edit_signatory_scroll" data-kt-scroll-offset="300px">
+        
+        <!-- Información del ID (solo lectura) -->
+        <div class="alert alert-light d-flex align-items-center p-5 mb-5">
+          <i class="ki-duotone ki-information fs-2x text-primary me-4">
+            <span class="path1"></span>
+            <span class="path2"></span>
+            <span class="path3"></span>
+          </i>
+          <div class="d-flex flex-column">
+            <span class="fw-bold">ID del Firmante: <span class="text-primary">{{signatory?.id}}</span></span>
+            <span class="text-muted">Última actualización: {{signatory?.updated_at | date:'medium'}}</span>
+          </div>
+        </div>
+        
+        <!-- Agrupación: Información Básica -->
+        <fieldset class="mb-4 p-3 border rounded">
+          <legend class="w-auto px-2" style="font-size: 1rem;">Información Básica</legend>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Departamento</label>
+              <input type="text" name="departament" class="form-control form-control-solid" 
+                     placeholder="Ej: Recursos Humanos, Contabilidad" 
+                     [(ngModel)]="departament" required 
+                     (input)="toUpperCase('departament')"/>
+              <div *ngIf="signaForm.submitted && !departament" class="text-danger small">
+                El departamento es requerido
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Cargo</label>
+              <input type="text" name="position" class="form-control form-control-solid" 
+                     placeholder="Ej: Gerente, Supervisor" 
+                     [(ngModel)]="position" required 
+                     (input)="toUpperCase('position')"/>
+              <div *ngIf="signaForm.submitted && !position" class="text-danger small">
+                El cargo es requerido
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Agrupación: Datos Personales -->
+        <fieldset class="mb-4 p-3 border rounded">
+          <legend class="w-auto px-2" style="font-size: 1rem;">Datos Personales</legend>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Nombre Completo</label>
+              <input type="text" name="name" class="form-control form-control-solid" 
+                     placeholder="Nombre del firmante" 
+                     [(ngModel)]="name" required 
+                     (input)="toUpperCase('name')"/>
+              <div *ngIf="signaForm.submitted && !name" class="text-danger small">
+                El nombre es requerido
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="fw-bold fs-6 mb-2">Título</label>
+              <input type="text" name="title" class="form-control form-control-solid" 
+                     placeholder="Ej: Lic., Ing., Dr." 
+                     [(ngModel)]="title" 
+                     (input)="toUpperCase('title')"/>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Agrupación: Configuración -->
+        <fieldset class="mb-4 p-3 border rounded">
+          <legend class="w-auto px-2" style="font-size: 1rem;">Configuración</legend>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="required fw-bold fs-6 mb-2">Orden</label>
+              <input type="number" name="order" class="form-control form-control-solid" 
+                     placeholder="1, 2, 3..." 
+                     [(ngModel)]="order" min="1" required />
+              <div class="form-text">Define el orden de aparición en listados</div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="fw-bold fs-6 mb-2 d-block">Estado</label>
+              <div class="form-check form-switch form-check-custom form-check-solid">
+                <input class="form-check-input" type="checkbox" role="switch" 
+                       id="is_active" [(ngModel)]="is_active" name="is_active">
+                <label class="form-check-label" for="is_active">
+                  {{ is_active ? 'Activo' : 'Inactivo' }}
+                </label>
+              </div>
+              <div class="form-text">Firmante activo/inactivo en el sistema</div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <!--end::Scroll-->
+      
+      <!--begin::Actions-->
+      <div class="text-center pt-15">
+        <button type="button" class="btn btn-light me-3" (click)="modal.dismiss()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-secondary me-3" (click)="resetForm()" *ngIf="signatory">
+          <i class="ki-duotone ki-reset fs-2 me-2"></i>
+          Restablecer
+        </button>
+        <button type="submit" class="btn btn-primary" 
+                [disabled]="signaForm.invalid || isLoading">
+          <span *ngIf="!isLoading">
+            <i class="ki-duotone ki-check fs-2 me-2"></i>
+            Actualizar
+          </span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm align-middle me-2"></span>
+            Actualizando...
+          </span>
+        </button>
+      </div>
+      <!--end::Actions-->
+    </form>
+    <!--end::Form-->
+  </div>
+  <!--end::Modal body-->
+</div>
+<!--end::Modal content EDIT-->

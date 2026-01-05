@@ -1,0 +1,99 @@
+<!--begin::Modal content CREATE-->
+<div class="modal-content">
+    <!--begin::Modal header-->
+    <div class="modal-header" id="kt_modal_add_user_header">
+        <!--begin::Modal title-->
+        <h2 class="fw-bolder">Crear Transformación de la Unidad: 
+            <td>
+                <span class="fs-2 fw-bold text-center d-block font-monospace">{{ UNIT_FULL.name }}</span>
+            </td>
+        </h2>
+        
+        <!--end::Modal title-->
+        <!--begin::Close-->
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close" (click)="modal.dismiss()">
+            <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+            <span class="svg-icon svg-icon-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+                    <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+                </svg>
+            </span>
+            <!--end::Svg Icon-->
+        </div>
+        <!--end::Close-->
+    </div>
+    <!--end::Modal header-->
+    <!--begin::Modal body-->
+    <div class="modal-body ">
+        <!--begin::Form-->
+        <form id="kt_modal_add_user_form" class="form" action="#">
+             <!--begin::Scroll-->
+            <div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_add_user_scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header" data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
+                <!--begin::Input group-->
+                <div class="fv-row mb-7">
+                    <!-- Etiqueta en un solo renglón -->
+                    <label class="required fw-bold fs-6 mb-2 d-block">Unidad a Transformar</label>
+                
+                    <!-- Contenedor flex para Select y Botón -->
+                    <div class="d-flex align-items-center">
+                        <!-- Select de Unidad -->
+                        <select class="form-control form-select-solid fw-bolder me-3" 
+                        name="unit_transform" 
+                        placeholder="Selec. Unidad"
+                        [(ngModel)] = "unit_to_id"
+                        >
+                            <ng-container *ngFor="let UNIT of UNITS">
+                                <option [value]="UNIT.id"> {{ UNIT.name }} </option>
+                            </ng-container>
+                        </select>
+                
+                        <!-- Botón Transformar -->
+                        <button type="button" (click)="store()" class="btn btn-primary" data-kt-users-modal-action="submit">
+                            <span class="indicator-label">Transformar</span>
+                            <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading | async"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="fv-row mb-7">
+                    <div class= "col-12">
+                        <div class="table-responsive w-100">
+                            <table class="table table-head-custom table-vertical-center" id="kt_advance_table_widget_1">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>UNIDAD/DIMENSION</th>
+                                        <th>ACCIÓN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let transform of UNIT_FULL.transforms; let i=index">
+                                        <td >
+                                            <span class="fs-2 fw-bold text-center d-block font-monospace">{{ transform.unit_to.name }}</span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <a class= "btn btn-icon btn-bg-light btn-active-light-primary btn-sm me-2" title="Borrar">
+                                            <i class="ki-duotone ki-eraser text-gray-900 fs-2tx" (click)="removeUnits(transform)">
+                                                <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                            </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--end::Scroll-->
+            <!--begin::Actions-->
+            <div class="text-center pt-15">
+                <button type="reset" class="btn btn-secondary me-3" (click)="modal.dismiss()">Cerrar</button>
+            </div>
+            <!--end::Actions-->
+        </form>
+        <!--end::Form-->
+    </div>
+    <!--end::Modal body-->
+</div>
+<!--end::Modal content CREATE-->

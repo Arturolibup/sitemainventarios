@@ -1,0 +1,84 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h2 class="fw-bolder">Crear Subárea</h2>
+    <!--begin::Close-->
+        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close" (click)="modal.dismiss()">
+            <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+            <span class="svg-icon svg-icon-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+                    <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+                </svg>
+            </span>
+            <!--end::Svg Icon-->
+        </div>
+  </div>
+
+  <div class="modal-body px-4 py-3">
+    <form [formGroup]="form" (ngSubmit)="store()">
+
+      <!-- Nombre -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-12">
+          <label class="required fw-bold fs-6 mb-2">Nombre de la Subárea</label>
+          <input type="text"
+                 formControlName="name"
+                 class="form-control form-control-solid"
+                 placeholder="Ej. Subárea de Investigación"
+                 (input)="toUpperCase('name')"
+                 (blur)="onNameBlur()"
+                 ngbTooltip="Ingrese el nombre de la subárea" />
+          <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El nombre es requerido.</div>
+            <div class="fv-help-block" *ngIf="form.get('name')?.errors?.unique">El nombre ya existe.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Área -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-12">
+          <label class="required fw-bold fs-6 mb-2">Área a la que pertenece</label>
+          <input type="text"
+                 [formControl]="areaSearch"
+                 class="form-control form-control-solid"
+                 placeholder="Buscar área"
+                 [ngbTypeahead]="searchAreas"
+                 [resultFormatter]="areaFormatter"
+                 [inputFormatter]="areaFormatter"
+                 (selectItem)="onAreaChange($event.item)"
+                 ngbTooltip="Busque y seleccione un área" />
+          <div *ngIf="areaSearch.invalid && areaSearch.touched" class="fv-plugins-message-container">
+            <div class="fv-help-block">El área es requerida.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localidad -->
+      <div class="mb-3">
+        <label class="required fw-bold fs-6 mb-2">Localidad</label>
+        <input type="text" formControlName="localidad"
+               class="form-control form-control-solid"
+               placeholder="Ej. Centro"
+               (input)="toUpperCase('localidad')" />
+      </div>
+
+      <!-- Municipio -->
+      <div class="mb-3">
+        <label class="required fw-bold fs-6 mb-2">Municipio</label>
+        <select formControlName="municipio" class="form-select form-select-solid">
+          <option value="">Seleccione un municipio</option>
+          <option *ngFor="let municipio of municipios" [value]="municipio">{{ municipio }}</option>
+        </select>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-end gap-3 pt-4 border-top">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
+          Crear Subárea
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

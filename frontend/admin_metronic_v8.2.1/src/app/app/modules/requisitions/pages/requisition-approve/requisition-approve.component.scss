@@ -1,0 +1,14 @@
+input[formControlName="searchControl"],
+input[formcontrol],
+input.form-control {
+  text-transform: uppercase;
+}
+.fa-info-circle {
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.tooltip-inner {
+  max-width: 300px;
+  text-align: left;
+}

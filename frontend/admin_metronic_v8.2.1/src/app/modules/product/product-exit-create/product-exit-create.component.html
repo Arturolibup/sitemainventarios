@@ -1,0 +1,246 @@
+<div class="d-flex flex-column flex-column-fluid">
+    <!--begin::Toolbar-->
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+        <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+            <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+                    {{ isEdit ? 'Editar Salida de Productos' : 'Crear Salida de Productos' }}
+                </h1>
+            </div>
+        </div>
+    </div>
+    <!--end::Toolbar-->
+
+    <!--begin::Content-->
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <div id="kt_app_content_container" class="app-container container-xxl">
+            <form id="kt_product_form" class="form d-flex flex-column flex-lg-row gap-7" (ngSubmit)="saveExit(productForm)" #productForm="ngForm"> 
+                <!-- Columna derecha principal -->
+                <div class="d-flex flex-column flex-row-fluid gap-7">
+                    <!-- Información General -->
+                    <div class="card card-flush py-4">
+                        <div class="card-header">
+                            <h2 class="card-title fs-3">Información General</h2>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="row g-5 mb-8">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Subárea:</label>
+                                    <div class="position-relative">
+                                        <input type="text" [(ngModel)]="searchSubareaQuery" name="searchSubareaQuery" placeholder="Buscar subárea..." (input)="searchSubarea(searchSubareaQuery)" autocomplete="off" class="form-control" />
+                                        <div *ngIf="searchSubareaResults.length > 0" class="search-results position-absolute w-100 bg-white border rounded mt-1 shadow-sm" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                            <ul class="list-group list-group-flush">
+                                                <li *ngFor="let subarea of searchSubareaResults" (click)="selectSubarea(subarea)" class="list-group-item list-group-item-action cursor-pointer">
+                                                    {{ subarea.name }}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <input type="text" [(ngModel)]="exitData.subarea_name" name="subarea_name" readonly required class="form-control mt-2" placeholder="Subárea seleccionada" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Área:</label>
+                                    <input type="text" [(ngModel)]="exitData.area_name" name="area_name" readonly required class="form-control" placeholder="Área (se asigna automáticamente)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-5 mb-8">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Referencia:</label>
+                                    <input type="text" [(ngModel)]="exitData.reference" name="reference" (input)="exitData.reference = exitData.reference.toUpperCase()" class="form-control" placeholder="Ingrese la referencia..." required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Fecha de Salida:</label>
+                                    <input type="date" [(ngModel)]="exitData.exit_date" name="exit_date" required class="form-control" />
+                                </div>
+                            </div>
+
+                            <!-- Selección del modo de factura -->
+                            <div class="row g-5 mb-8">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Modo de Factura:</label>
+                                    <select [(ngModel)]="exitData.invoice_mode" name="invoice_mode" (ngModelChange)="onInvoiceModeChange()" class="form-control form-select" required>
+                                        <option value="multiple_invoices">Varias Facturas</option>
+                                        <option value="single_invoice">Una Sola Factura</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" *ngIf="exitData.invoice_mode === 'single_invoice'">
+                                    <label class="form-label required">Factura:</label>
+                                    <div class="position-relative">
+                                        <input type="text" [(ngModel)]="searchInvoiceQuery" name="searchInvoiceQuery" placeholder="Buscar factura..." (input)="searchInvoice(searchInvoiceQuery)" autocomplete="off" class="form-control" />
+                                        <div *ngIf="searchInvoiceResults.length > 0" class="search-results position-absolute w-100 bg-white border rounded mt-1 shadow-sm" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                            <ul class="list-group list-group-flush">
+                                                <li *ngFor="let invoice of searchInvoiceResults" (click)="selectInvoice(invoice)" class="list-group-item list-group-item-action cursor-pointer">
+                                                    {{ invoice }}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <input type="text" [(ngModel)]="exitData.single_invoice_number" name="single_invoice_number" readonly class="form-control mt-2" placeholder="Factura seleccionada" />
+                                </div>
+                            </div>
+
+                            <!-- Campos para estado visual y fecha de caducidad -->
+                            <div class="row g-5 mb-8">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Estado Visual:</label>
+                                    <select [(ngModel)]="exitData.exit_status" name="exit_status" required class="form-control form-select" (ngModelChange)="onStatusChange()">
+                                        <option value="pending">Pendiente</option>
+                                        <option value="completed">Completada</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" *ngIf="exitData.exit_status === 'pending'">
+                                    <label class="form-label required">Fecha de Caducidad:</label>
+                                    <input type="datetime-local" [(ngModel)]="exitData.pending_expires_at" name="pending_expires_at" required [min]="minDateTime" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Productos -->
+                    <div class="card card-flush py-4">
+                        <div class="card-header">
+                            <h2 class="card-title fs-3">Productos</h2>
+                        </div>
+                        <div class="card-body pt-0">
+                            <!-- Mostrar búsqueda manual solo en modo multiple_invoices -->
+                            <div class="row g-5 mb-8" *ngIf="exitData.invoice_mode === 'multiple_invoices'">
+                                <div class="col-md-12">
+                                    <label class="form-label required">Buscar Producto:</label>
+                                    <div class="position-relative">
+                                        <input type="text" [(ngModel)]="searchProductQuery" name="searchProductQuery" placeholder="Escribe para buscar..." (input)="searchProduct(searchProductQuery)" autocomplete="off" class="form-control" />
+                                        <!-- MODIFICACIÓN 1: Actualizar cómo se muestran los resultados de búsqueda para incluir stock_global o stock como fallback -->
+                                        <div *ngIf="searchProductResults.length > 0" class="search-results position-absolute w-100 bg-white border rounded mt-1 shadow-sm" style="z-index: 1000; max-height: 300px; overflow-y: auto;">
+                                            <ul class="list-group list-group-flush">
+                                                <li *ngFor="let product of searchProductResults" (click)="selectProduct(product)" class="list-group-item list-group-item-action cursor-pointer">
+                                                    <strong>{{ product.title }}</strong> - ({{ product.unit }}) 
+                                                    <br><small class="text-muted">Stock: {{ product.stock_global !== undefined && product.stock_global !== null ? product.stock_global : (product.stock !== undefined && product.stock !== null ? product.stock : 'N/A') }} | Factura: {{ product.invoice_number || 'N/A' }}</small>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="exitData.products.length === 0" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No hay productos seleccionados. 
+                                {{ exitData.invoice_mode === 'multiple_invoices' ? 'Busca y selecciona un producto para agregar.' : 'Selecciona una factura para cargar los productos.' }}
+                            </div>
+
+                            <!-- MODIFICACIÓN 2: Corregir la estructura de la tabla para modo "Una Sola Factura" -->
+                            <div *ngIf="exitData.products.length > 0 && exitData.invoice_mode === 'single_invoice'" class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr class="text-center">
+                                            <th class="text-start" class="text-center">Producto</th>
+                                            <th class="text-center">Stock Disponible<br><small>(Entrada)</small></th>
+                                            <th class="text-center">Stock Total<br><small>(Almacén)</small></th>
+                                            <th class="text-center">Cantidad</th>
+                                            <th class="text-center">Facturas Utilizadas</th>
+                                            <th class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let product of exitData.products; let i = index">
+                                            <td class="text-start">
+                                                <strong>{{ product.title }}</strong><br>
+                                                <small class="text-muted">({{ product.unit }})</small>
+                                            </td>
+                                            <!-- La primera celda de stock es Stock Disponible (entrada) -->
+                                            <td class="text-center">
+                                                <span class="badge badge-light-primary">{{ product.stock !== undefined && product.stock !== null ? product.stock : 'N/A' }}</span>
+                                            </td>
+                                            <!-- La segunda celda es Stock Total (almacén) -->
+                                            <td class="text-center">
+                                                <span class="badge badge-light-info">{{ product.stock_global !== undefined && product.stock_global !== null ? product.stock_global : 'N/A' }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input 
+                                                    type="number" 
+                                                    [(ngModel)]="product.quantity" 
+                                                    [name]="'quantity_' + i" 
+                                                    min="0" 
+                                                    [max]="product.stock" 
+                                                    (ngModelChange)="onQuantityChange(product, i)" 
+                                                    class="form-control form-control-sm text-center"
+                                                    style="width: 80px; margin: 0 auto;" />
+                                            </td>
+                                            <td class="text-center">
+                                                <small>{{ getUsedEntriesDisplay(product) }}</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" (click)="removeProduct(i)" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- MODIFICACIÓN 3: Actualizar la tabla para modo "Varias Facturas" -->
+                            <div *ngIf="exitData.products.length > 0 && exitData.invoice_mode === 'multiple_invoices'" class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr class="text-center">
+                                            <th class="text-start" class="text-center">Producto</th>
+                                            <th class="text-center"> Stock Total<br><small>(Almacén)</small></th>
+                                            <th class="text-center">Cantidad</th>
+                                            <th class="text-center">Facturas Utilizadas</th>
+                                            <th class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let product of exitData.products; let i = index">
+                                            <td class="text-start">
+                                                <strong>{{ product.title }}</strong><br>
+                                                <small class="text-muted">({{ product.unit }})</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-light-info">{{ product.stock_global !== undefined && product.stock_global !== null ? product.stock_global : (product.stock !== undefined && product.stock !== null ? product.stock : 'N/A') }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input 
+                                                    type="number" 
+                                                    [(ngModel)]="product.quantity" 
+                                                    [name]="'quantity_' + i" 
+                                                    min="1" 
+                                                    [max]="product.stock_global !== undefined && product.stock_global !== null ? product.stock_global : (product.stock !== undefined && product.stock !== null ? product.stock : 0)" 
+                                                    required 
+                                                    (ngModelChange)="onQuantityChange(product, i)" 
+                                                    class="form-control form-control-sm text-center"
+                                                    style="width: 80px; margin: 0 auto;" />
+                                            </td>
+                                            <td class="text-center">
+                                                <small *ngIf="getUsedEntriesDisplay(product) !== 'Pendiente'">{{ getUsedEntriesDisplay(product) }}</small>
+                                                <small *ngIf="getUsedEntriesDisplay(product) === 'Pendiente'" class="text-warning">{{ getUsedEntriesDisplay(product) }}</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" (click)="removeProduct(i)" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-end gap-3">
+                        <button type="button" (click)="cancel()" class="btn btn-light">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" [disabled]="isSaveDisabled()">
+                            <span class="spinner-border spinner-border-sm align-middle me-2" *ngIf="isLoading"></span>
+                            <i class="fas fa-save me-2" *ngIf="!isLoading"></i>
+                            {{ isEdit ? 'Actualizar Salida' : 'Guardar Salida' }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

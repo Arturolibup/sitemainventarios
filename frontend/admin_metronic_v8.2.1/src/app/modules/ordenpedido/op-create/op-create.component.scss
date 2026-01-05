@@ -1,0 +1,456 @@
+/* op-create.component.scss */
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875em;
+}
+
+
+.card {
+  margin: 20px;
+}
+
+.form-control[readonly] {
+  cursor: pointer;
+  background-color: #f3f6f9; /* Fondo claro de Metronic */
+}
+
+.form-control:focus {
+  border-color: #1e1e2d; /* Color primario de Metronic */
+  box-shadow: 0 0 5px rgba(30, 30, 45, 0.3);
+}
+
+.form-control.is-invalid {
+  border-color: #f64e60; /* Color de error de Metronic */
+}
+
+.table {
+  font-size: 12px;
+
+  th,
+  td {
+    vertical-align: middle;
+  }
+
+  textarea {
+    min-height: 40px;
+  }
+}
+
+.modal-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.modal-full-width {
+  width: 90%;
+  max-width: 1200px;
+}
+
+@media (max-width: 768px) {
+  .modal-full-width {
+    width: 95%;
+    max-width: none;
+  }
+
+  .table {
+    font-size: 10px; /* Reducir tamaño de fuente en móviles */
+  }
+
+  .form-control {
+    font-size: 11px; /* Asegurar legibilidad en inputs */
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+:host {
+  display: block;
+}
+
+.card-custom {
+  border: 1px solid #e4e6ef; /* Borde de Metronic */
+  border-radius: 4px;
+}
+
+.btn-primary {
+  background-color: #1e1e2d; /* Color primario de Metronic */
+  border-color: #1e1e2d;
+}
+
+.btn-primary:hover {
+  background-color: #2a2a3d;
+  border-color: #2a2a3d;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f5f5f5; /* Fondo hover de Metronic */
+}
+
+/* Notificaciones tipo post-it */
+.notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050; /* Por encima de los modales de Metronic */
+  max-width: 300px;
+}
+
+.post-it {
+  background-color: #fff3cd; /* Fondo amarillo post-it */
+  border: 2px solid #ffeb3b;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  position: relative;
+}
+
+.post-it .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  color: #1e1e2d;
+}
+
+
+.notification-post-it.read {
+  background-color: #e2e3e5;
+  border-color: #d3d4d5;
+}
+
+/* Estilo para SweetAlert2 notificaciones */
+.post-it-notification {
+  background-color: #fff3cd !important;
+  border: 2px solid #ffeb3b !important;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2) !important;
+  font-family: 'Comic Sans MS', cursive, sans-serif !important;
+}
+
+/* Estilo para botones en modales */
+.modal-table .btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.alert-success {
+  margin-bottom: 15px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+//modal para creacion de productos
+.modal-content {
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  border: none;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #e4e6ef;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #3699ff;
+  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+}
+
+.modal-header {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.modal-footer {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+//personlizar campos.
+
+
+  .input-description {
+  width: 280px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 250px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+}
+
+  .input-placa {
+  width: 100px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/
+  
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  }
+
+  .input-marca {
+  width: 75px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  }
+
+  .input-modelo {
+  width: 60px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  }
+
+  .input-tipo {
+  width: 75px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  }
+
+  .input-cilindro {
+  width: 50px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-oficio {
+  width: 110px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 60px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-ur {
+  width: 60px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 40px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-grupo {
+  width: 70px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 40px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-subgrupo {
+  width: 70px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 40px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-progresivo {
+  width: 80px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-brand {
+  width: 100px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-unit_id {
+  width: 100px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-quantity {
+  width: 60px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-unit_price {
+  width: 110px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-partida {
+  width: 100px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }
+  .input-importe {
+  width: 100px;        /* ancho fijo, ajústalo a tu tabla */
+  min-height: 38px;    /* altura mínima: una línea */
+  max-height: 50px;   /* altura máxima para evitar desbordar la UI */
+  overflow-y: hidden;  /* ocultar scroll (se expande en lugar de usarlo) */
+  resize: none;        /* evitar que el usuario cambie tamaño manual */
+  line-height: 1.4;   /* mejor legibilidad */
+  white-space:pre-wrap;
+  font-size: 10px; /*respera saltos de linea*/ 
+  /* Centrado completo */
+  display: flex;
+  align-items: center;     /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  text-align: center;      /* Para texto multilínea */
+  
+  }

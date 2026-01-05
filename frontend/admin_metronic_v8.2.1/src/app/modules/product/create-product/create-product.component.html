@@ -1,0 +1,305 @@
+<div class="d-flex flex-column flex-column-fluid">
+  <!--begin::Toolbar-->
+  <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+      <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+          <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+              <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+                  Alta de Entrada de Producto
+              </h1>
+          </div>
+      </div>
+  </div>
+  <!--end::Toolbar-->
+
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="text-center p-5">
+      <span class="spinner-border spinner-border-sm text-primary me-2"></span> Cargando datos...
+  </div>
+
+  <!--begin::Content-->
+  <div id="kt_app_content" class="app-content flex-column-fluid">
+      <div id="kt_app_content_container" class="app-container container-xxl">
+          <form id="kt_entry_form" class="form d-flex flex-column gap-7" (ngSubmit)="saveGeneral()">
+              <!--begin::Tabs-->
+              <div class="card card-flush">
+                  <!--begin::Card header-->
+                  <div class="card-header p-4">
+                      <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-0 fs-6 border-bottom-0">
+                          <li class="nav-item">
+                              <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'general'}" (click)="setActiveTab('general', $event)" data-bs-toggle="tab" href="#kt_tab_general">
+                                  Datos Generales
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'products'}" (click)="setActiveTab('products', $event)" data-bs-toggle="tab" href="#kt_tab_products">
+                                  Productos
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'evidences'}" (click)="setActiveTab('evidences', $event)" data-bs-toggle="tab" href="#kt_tab_evidences">
+                                  Evidencias
+                              </a>
+                          </li>
+                      </ul>
+                  </div>
+                  <!--end::Card header-->
+
+                  <!--begin::Card body-->
+                  <div class="card-body pt-0 p-6">
+                      <div class="tab-content">
+                          <!--begin::Tab General-->
+                          <div class="tab-pane fade" [ngClass]="{'show active': activeTab === 'general'}" id="kt_tab_general" role="tabpanel">
+                              <div class="d-flex flex-column gap-7">
+                                  <!-- Información General -->
+                                  <div class="card card-flush py-4">
+                                      <div class="card-header">
+                                          <h2 class="card-title fs-3 text-dark">Información General</h2>
+                                      </div>
+                                      <div class="card-body pt-0">
+                                          <div class="row gy-5 mb-8">
+                                              <!-- Proveedor -->
+                                              <div class="col-md-6 position-relative">
+                                                  <label class="form-label fw-semibold required">Proveedor</label>
+                                                  <input type="text" [(ngModel)]="generalData.providerSearch" name="providerSearch" (input)="searchProviders($event)" (keydown.enter)="selectProviderFromList()"
+                                                      class="form-control" placeholder="Buscar proveedor..." required [ngClass]="{'is-invalid': !generalData.provider_id}" />
+                                                  <div class="invalid-feedback" *ngIf="!generalData.provider_id">Debe seleccionar un proveedor.</div>
+                                                  <!-- Lista de proveedores -->
+                                                  <div class="menu menu-sub menu-sub-dropdown show w-100" *ngIf="filteredProviders.length > 0" style="position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                                      <div class="px-4 py-3">
+                                                          <a href="#" class="menu-item px-3" *ngFor="let provider of filteredProviders" (click)="selectProvider(provider); $event.preventDefault()">
+                                                              {{ provider.full_name }}
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                                  <!-- Mensaje si no hay resultados -->
+                                                  <div class="menu menu-sub menu-sub-dropdown show w-100" *ngIf="filteredProviders.length === 0 && generalData.providerSearch && !generalData.provider_id" style="position: absolute; z-index: 1000;">
+                                                      <div class="px-4 py-3">
+                                                          <span class="menu-item text-muted">No se encontraron proveedores.</span>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <!-- Origen del Recurso -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold">Origen del Recurso</label>
+                                                  <input type="text" [(ngModel)]="generalData.resource_origin" name="resource_origin" (input)="generalData.resource_origin = generalData.resource_origin.toUpperCase()"
+                                                      class="form-control" />
+                                              </div>
+                                              <!-- Programa Federal -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold">Programa Federal</label>
+                                                  <input type="text" [(ngModel)]="generalData.federal_program" name="federal_program" (input)="generalData.federal_program = generalData.federal_program.toUpperCase()"
+                                                      class="form-control" />
+                                              </div>
+                                              <!-- Número de Factura -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold required">Número de Factura</label>
+                                                  <input type="text" [(ngModel)]="generalData.invoice_number" name="invoice_number" (blur)="checkInvoiceNumber($event); generalData.invoice_number = generalData.invoice_number.toUpperCase()"
+                                                      class="form-control" placeholder="Introduce el número de factura" required [ngClass]="{'is-invalid': invoiceExists || !generalData.invoice_number}" />
+                                                  <div class="invalid-feedback" *ngIf="invoiceExists">El número de factura ya existe.</div>
+                                                  <div class="invalid-feedback" *ngIf="!generalData.invoice_number && !invoiceExists">El número de factura es obligatorio.</div>
+                                              </div>
+                                              <!-- Número de Pedido -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold required">Número de Pedido</label>
+                                                  <input type="text" [(ngModel)]="generalData.order_number" name="order_number" (blur)="checkOrderNumber($event); generalData.order_number = generalData.order_number.toUpperCase()"
+                                                      class="form-control" placeholder="Introduce el número de pedido" required [ngClass]="{'is-invalid': orderExists || !generalData.order_number}" />
+                                                  <div class="invalid-feedback" *ngIf="orderExists">El número de orden ya existe.</div>
+                                                  <div class="invalid-feedback" *ngIf="!generalData.order_number && !orderExists">El número de pedido es obligatorio.</div>
+                                              </div>
+                                              <!-- Proceso -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold">Proceso</label>
+                                                  <input type="text" [(ngModel)]="generalData.process" name="process" (input)="generalData.process = generalData.process.toUpperCase()"
+                                                      class="form-control" />
+                                              </div>
+                                              <!-- Fecha de Entrada -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold">Fecha de Entrada</label>
+                                                  <input type="date" [(ngModel)]="generalData.entry_date" name="entry_date" class="form-control" />
+                                              </div>
+                                              <!-- Subtotal -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold required">Subtotal</label>
+                                                  <input type="text" [(ngModel)]="generalData.subtotal" name="subtotal" (input)="validateNumberInput($event, 'subtotal')" (blur)="formatCurrency('subtotal')"
+                                                      class="form-control" placeholder="0.00" required />
+                                              </div>
+                                              <!-- IVA -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold required">IVA</label>
+                                                  <input type="text" [(ngModel)]="generalData.iva" name="iva" (input)="validateNumberInput($event, 'iva')" (blur)="formatCurrency('iva')"
+                                                      class="form-control" placeholder="0.00" required />
+                                              </div>
+                                              <!-- Total -->
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold required">Total</label>
+                                                  <input type="text" [(ngModel)]="generalData.total" name="total" (input)="validateNumberInput($event, 'total')" (blur)="formatCurrency('total')"
+                                                      class="form-control" placeholder="0.00" required />
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <!-- Botones de acción -->
+                                  <div class="d-flex justify-content-end gap-3 mt-4">
+                                      <button type="button" class="btn btn-light" (click)="cancel()">Cancelar</button>
+                                      <button type="submit" class="btn btn-primary" [disabled]="!generalData.provider_id || !generalData.invoice_number || !generalData.order_number || invoiceExists || orderExists">
+                                          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+                                          Continuar
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                          <!--end::Tab General-->
+
+                          <!--begin::Tab Products-->
+                          <div class="tab-pane fade" [ngClass]="{'show active': activeTab === 'products'}" id="kt_tab_products" role="tabpanel">
+                              <div class="d-flex flex-column gap-7">
+                                  <div class="card card-flush py-4">
+                                      <div class="card-header">
+                                          <h2 class="card-title fs-3 text-dark">Productos</h2>
+                                      </div>
+                                      <div class="card-body pt-0">
+                                          <div class="row gy-5 mb-8">
+                                              <!-- Búsqueda de Productos -->
+                                              <div class="col-md-12 position-relative">
+                                                  <label class="form-label fw-semibold required">Buscar Producto</label>
+                                                  <input type="text" 
+                                                  [(ngModel)]="productSearchQuery" 
+                                                  name="product_search_query" id="product_search_input"
+                                                  (input)="searchProducts($event)" 
+                                                  (keydown.enter)="selectProductFromList()"
+                                                      class="form-control" placeholder="Buscar producto por título..." required />
+                                                  <!-- Lista de productos -->
+                                                  <div class="menu menu-sub menu-sub-dropdown show w-100" *ngIf="filteredProducts.length && productSearchQuery" style="position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                                      <div class="px-4 py-3">
+                                                          <a href="#" class="menu-item px-3 d-flex justify-content-between align-items-center" *ngFor="let product of filteredProducts" (click)="selectProduct(product); $event.preventDefault()">
+                                                              <span style="flex: 1;">{{ product.title }}</span>
+                                                              <span class="text-muted">Stock: {{ product.stock || 0 }}</span>
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <!-- Tabla de Productos -->
+                                              <div class="table-responsive">
+                                                  <table class="table table-striped gy-5 gs-5">
+                                                      <thead>
+                                                          <tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
+                                                              <th class="text-center">Producto</th>
+                                                              <th class="text-center">Cantidad</th>
+                                                              <th class="text-center">Partida</th>
+                                                              <th class="text-center">Precio Unitario</th>
+                                                              <th class="text-center">Stock</th>
+                                                              <th class="text-center">Acciones</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                          <tr *ngFor="let item of products; let i = index">
+                                                              <td class="text-center">{{ item.product.title }}</td>
+                                                              <td class="text-center">
+                                                                  <input type="number" [(ngModel)]="item.quantity" name="quantity_{{i}}" (input)="parseQuantity(i, $event)"
+                                                                      [ngClass]="{'is-invalid': item.quantity <= 0}" required class="form-control form-control-sm w-75 mx-auto" />
+                                                                  <div class="invalid-feedback" *ngIf="item.quantity <= 0">Mayor a 0</div>
+                                                              </td>
+                                                              <td class="text-center">
+                                                                  <input type="number" [(ngModel)]="item.partida" name="partida_{{i}}" (input)="parsePartida(i, $event)"
+                                                                      [ngClass]="{'is-invalid': item.partida <= 0}" required class="form-control form-control-sm w-75 mx-auto" />
+                                                                  <div class="invalid-feedback" *ngIf="item.partida <= 0">Mayor a 0</div>
+                                                              </td>
+                                                              <td class="text-center">
+                                                                  <input type="text" [(ngModel)]="item.unit_price" name="unit_price_{{i}}" (input)="validateNumberInputForProduct(i, $event)" (blur)="formatCurrencyForProduct(i)"
+                                                                      [ngClass]="{'is-invalid': item.unit_price <= 0}" required class="form-control form-control-sm w-75 mx-auto" />
+                                                                  <div class="invalid-feedback" *ngIf="item.unit_price <= 0">Mayor a 0</div>
+                                                              </td>
+                                                              <td class="text-center">{{ item.product.stock || 0 }}</td>
+                                                              <td class="text-center">
+                                                                  <button type="button" class="btn btn-sm btn-danger" (click)="removeProduct(i)">Eliminar</button>
+                                                              </td>
+                                                          </tr>
+                                                          <tr *ngIf="!products.length">
+                                                              <td colspan="6" class="text-center text-muted py-5">No hay productos agregados.</td>
+                                                          </tr>
+                                                          <tr *ngIf="products.length > 0">
+                                                              <td colspan="6" class="text-center">
+                                                                  <button type="button" class="btn btn-success" (click)="addAnotherProduct()">Agregar Otro Producto</button>
+                                                              </td>
+                                                          </tr>
+                                                      </tbody>
+                                                  </table>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <!-- Botones de acción -->
+                                  <div class="d-flex justify-content-end gap-3 mt-4">
+                                      <button type="button" class="btn btn-light" (click)="cancel()">Cancelar</button>
+                                      <button type="button" class="btn btn-primary" (click)="saveProducts()">
+                                          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+                                          Continuar
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                          <!--end::Tab Products-->
+
+                          <!--begin::Tab Evidences-->
+                          <div class="tab-pane fade" [ngClass]="{'show active': activeTab === 'evidences'}" id="kt_tab_evidences" role="tabpanel">
+                              <div class="d-flex flex-column gap-7">
+                                  <div class="card card-flush py-4">
+                                      <div class="card-header">
+                                          <h2 class="card-title fs-3 text-dark">Evidencias</h2>
+                                      </div>
+                                      <div class="card-body pt-0">
+                                          <!-- Subir Evidencias -->
+                                          <div class="mb-8">
+                                              <label class="form-label fw-semibold">Subir Evidencias (PDF, Imágenes)</label>
+                                              <input type="file" class="form-control" multiple (change)="onFileChange($event)" accept=".pdf,.jpg,.jpeg,.png" />
+                                          </div>
+                                          <!-- Tabla de Vistas Previas -->
+                                          <div class="table-responsive" *ngIf="evidencePreviews.length">
+                                              <table class="table table-striped gy-5 gs-5">
+                                                  <thead>
+                                                      <tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
+                                                          <th class="text-center">Archivo</th>
+                                                          <th class="text-center">Vista Previa</th>
+                                                          <th class="text-center">Acciones</th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                      <tr *ngFor="let preview of evidencePreviews; let i = index">
+                                                          <td class="text-center">{{ preview.file.name }}</td>
+                                                          <td class="text-center">
+                                                              <img *ngIf="preview.file.type.startsWith('image/')" [src]="preview.url" style="max-width: 100px; max-height: 100px;" alt="Vista previa">
+                                                              <span *ngIf="!preview.file.type.startsWith('image/')" class="text-muted">No hay vista previa disponible</span>
+                                                          </td>
+                                                          <td class="text-center">
+                                                              <button type="button" class="btn btn-sm btn-danger" (click)="removeEvidence(i)">Eliminar</button>
+                                                          </td>
+                                                      </tr>
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <!-- Botones de acción -->
+                                  <div class="d-flex justify-content-end gap-3 mt-4">
+                                      <button type="button" class="btn btn-light" (click)="cancel()">Cancelar</button>
+                                      <button type="button" class="btn btn-primary" (click)="saveEvidences()">
+                                          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+                                          Guardar y Continuar
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                          <!--end::Tab Evidences-->
+                      </div>
+                  </div>
+                  <!--end::Card body-->
+              </div>
+              <!--end::Tabs-->
+          </form>
+      </div>
+  </div>
+  <!--end::Content-->
+</div>

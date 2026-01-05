@@ -1,0 +1,39 @@
+.chat-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #009ef7;
+  color: #fff;
+  font-size: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  z-index: 9999;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 7px 18px rgba(0, 0, 0, 0.3);
+  }
+
+  .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #f64e60;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

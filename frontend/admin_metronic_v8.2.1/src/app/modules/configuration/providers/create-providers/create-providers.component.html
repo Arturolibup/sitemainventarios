@@ -1,0 +1,70 @@
+<div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header">
+        <h2 class="fw-bolder">Crear Proveedor</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    
+    <!-- Modal Body -->
+    <div class="modal-body">
+        <form id="categoryForm" class="form" #categoryForm="ngForm">
+            <div class="d-flex flex-column scroll-y pe-7">
+                
+                <!-- Nombre del Proveedor -->
+                <div class="mb-4">
+                    <label class="required fw-bold fs-6 mb-2">Nombre del Proveedor / Razón Social Empresa</label>
+                    <input type="text" name="full_name" class="form-control form-control-solid" (input)="full_name = full_name.toUpperCase()" placeholder="Ej. Aceros del Pacífico" [(ngModel)]="full_name" required />
+                    <div *ngIf="categoryForm.submitted && !full_name" class="text-danger small">El Campo es requerido.</div>
+                </div>
+                
+                <!-- RFC y Email en la misma fila -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="required fw-bold fs-6 mb-2">R.F.C / Empresa</label>
+                        <input type="text" name="rfc" class="form-control form-control-solid" (input)="rfc = rfc.toUpperCase()" placeholder="RFC/SAT" [(ngModel)]="rfc" required />
+                        <div *ngIf="categoryForm.submitted && !rfc" class="text-danger small">El Campo es requerido.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="required fw-bold fs-6 mb-2">Email</label>
+                        <input type="email" name="email" class="form-control form-control-solid" placeholder="Ej. example@gmail.com" [(ngModel)]="email" required />
+                        <div *ngIf="categoryForm.submitted && !email" class="text-danger small">El Email es requerido.</div>
+                    </div>
+                </div>
+                
+                <!-- Dirección y Teléfono en la misma fila -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label class="required fw-bold fs-6 mb-2">Dirección</label>
+                        <textarea name="address" class="form-control form-control-solid" 
+                            (input)="address = address.toUpperCase()" placeholder="Dirección" 
+                            [(ngModel)]="address" rows="3" required></textarea>
+                        <div *ngIf="categoryForm.submitted && !address" class="text-danger small">La dirección es requerida.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="required fw-bold fs-6 mb-2">Teléfono</label>
+                        <input type="text" name="phone" class="form-control form-control-solid" placeholder="99999999" [(ngModel)]="phone" required />
+                        <div *ngIf="categoryForm.submitted && !phone" class="text-danger small">El Teléfono es requerido.</div>
+                    </div>
+                </div>
+                
+                <!-- Imagen -->
+                <div class="mb-4">
+                    <label class="required fw-bold fs-6 mb-2">Logo Proveedor</label>
+                    <input type="file" class="form-control form-control-solid" (change)="processFile($event)" accept=".jpeg, .jpg, .png, .gif, .webp" required />
+                    <div *ngIf="IMAGEN_PREVISUALIZA" class="mt-2">
+                        <img [src]="IMAGEN_PREVISUALIZA" alt="Vista Previa" class="rounded" style="max-width: 250px;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="text-center pt-15">
+                <button type="reset" class="btn btn-light me-3" (click)="modal.dismiss()">Cerrar</button>
+                
+                <button type="button" class="btn btn-primary" [disabled]="categoryForm.invalid" (click)="store()">
+                    <span class="indicator-label">Register</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
