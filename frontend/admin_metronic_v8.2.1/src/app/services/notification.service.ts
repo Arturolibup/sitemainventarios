@@ -8,10 +8,14 @@ import { SocketService } from './socket.service';
   providedIn: 'root'
 })
 export class NotificationService {
-  
-  
-  error(message: string) {
-    Swal.fire({ icon: 'error', title: 'Error', text: message });
+
+
+  error(message: string, details: string[] = []) {
+    const footer = details.length
+      ? `<ul style="text-align:left;margin:0;padding-left:1.2rem;">${details.map((item) => `<li>${item}</li>`).join('')}</ul>`
+      : undefined;
+
+    Swal.fire({ icon: 'error', title: 'Error', text: message, ...(footer ? { footer } : {}) });
   }
   warning(message: string) {
     Swal.fire({ icon: 'warning', title: 'Atención', text: message });

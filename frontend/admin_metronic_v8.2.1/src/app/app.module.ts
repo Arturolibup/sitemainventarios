@@ -2,7 +2,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { ClipboardModule } from 'ngx-clipboard';
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,6 +27,7 @@ import { OpReceiveListComponent } from './modules/ordenpedido/op-receive-list/op
 //import { NumberFormatDirective } from './directives/number-format.directive';
 import { AiModule } from '../modules/ai/ai.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { HttpErrorInterceptor } from './services/http-error.interceptor';
 
 // #fake-end#
 
@@ -84,6 +85,11 @@ function appInitializer(authService: AuthService) {
     {  //inserto el 18abril2025
       provide: LOCALE_ID,
       useValue: 'es-MX'
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpErrorInterceptor,
+      multi: true,
     },
   ],
   bootstrap: [AppComponent],
