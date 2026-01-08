@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Configuration\Area;
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\Subarea;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class SubareaController extends Controller
 {
+    use ApiResponses;
 
     public function __construct()
     {
@@ -31,7 +33,7 @@ class SubareaController extends Controller
 
         $areas = Area::orderBy("id", "desc")->get();
 
-        return response()->json([
+        return $this->successResponse([
             "total" => $subareas->total(),
             "subareas" => $subareas->map(function ($subarea) {
                 return [
@@ -77,7 +79,7 @@ class SubareaController extends Controller
             ]);
         }
         $subarea = Subarea::create($request->all());
-        return response()->json([
+        return $this->successResponse([
             "message" => 200,
             "subarea" => [
                 "id" => $subarea->id,
@@ -119,7 +121,7 @@ class SubareaController extends Controller
         }
         $subarea = Subarea::findOrFail($id);
         $subarea->update($request->all());
-        return response()->json([
+        return $this->successResponse([
             "message" => 200,
             "subarea" => [
                 "id" => $subarea->id,
@@ -140,7 +142,7 @@ class SubareaController extends Controller
     {
         $subarea = Subarea::findOrFail($id);
         $subarea->delete();
-        return response()->json([
+        return $this->successResponse([
             "message" => 200,
         ]);
     }
@@ -153,7 +155,7 @@ class SubareaController extends Controller
             "RUIZ", "SAN BLAS", "SAN PEDRO LAGUNILLAS", "SANTA MARIA DEL ORO", "SANTIAGO IXCUINTLA",
             "RECUALA", "TEPIC", "TUXPAN", "LA YESCA", "BAHIA DE BANDERAS"
         ];
-        return response()->json($municipios);
+        return $this->successResponse($municipios);
     }
 
     public function validateUniqueness(Request $request)
@@ -170,7 +172,7 @@ class SubareaController extends Controller
 
     $exists = Subarea::where($field, $value)->exists();
 
-    return response()->json([
+    return $this->successResponse([
         'exists' => $exists
     ]);
 }
@@ -180,7 +182,7 @@ public function search(Request $request)
     $search = $request->get('search', ''); // Término de búsqueda
 
     if (empty($search)) {
-        return response()->json(['subareas' => []]);
+        return $this->successResponse(['subareas' => []]);
     }
 
     $subareas = Subarea::with('area')
@@ -189,7 +191,7 @@ public function search(Request $request)
         ->limit(10) // Límite para eficiencia
         ->get();
 
-    return response()->json([
+    return $this->successResponse([
         'subareas' => $subareas->map(function ($subarea) {
             return [
                 'id' => $subarea->id,
@@ -214,7 +216,7 @@ public function getByArea($areaId)
         ->orderBy('name')
         ->get();
 
-    return response()->json([
+    return $this->successResponse([
         'total' => $subareas->count(),
         'subareas' => $subareas
     ]);

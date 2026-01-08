@@ -10,9 +10,12 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class TipoController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Obtener la lista de tipos, opcionalmente filtrados por marca_id y búsqueda por coincidencia.
      *
@@ -37,7 +40,7 @@ class TipoController extends Controller
             ->where('nombre', 'like', "%{$search}%")
             ->get();
 
-        return response()->json(['tipos' => $tipos], 200);
+        return $this->successResponse(['tipos' => $tipos]);
     }
 
     /**
@@ -58,7 +61,7 @@ class TipoController extends Controller
             'marca_id' => $request->marca_id,
         ]);
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
             'tipo' => [
                 'id' => $tipo->id,
@@ -66,7 +69,7 @@ class TipoController extends Controller
                 'marca_id' => $tipo->marca_id,
                 'created_at' => $tipo->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -79,14 +82,14 @@ class TipoController extends Controller
     {
         $tipo = Tipo::findOrFail($id);
 
-        return response()->json([
+        return $this->successResponse([
             'tipo' => [
                 'id' => $tipo->id,
                 'nombre' => $tipo->nombre,
                 'marca_id' => $tipo->marca_id,
                 'created_at' => $tipo->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -109,7 +112,7 @@ class TipoController extends Controller
             'marca_id' => $request->marca_id,
         ]);
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
             'tipo' => [
                 'id' => $tipo->id,
@@ -117,7 +120,7 @@ class TipoController extends Controller
                 'marca_id' => $tipo->marca_id,
                 'created_at' => $tipo->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -137,8 +140,8 @@ class TipoController extends Controller
         }
         $tipo->delete();
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
-        ], 200);
+        ]);
     }
 }

@@ -11,9 +11,12 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class MarcaController extends Controller
 {
+    use ApiResponses;
+
     /**
      * Obtener la lista de marcas, con soporte para búsqueda por coincidencia.
      *
@@ -27,7 +30,7 @@ class MarcaController extends Controller
             ->where('nombre', 'like', "%{$search}%")
             ->get();
 
-        return response()->json(['marcas' => $marcas], 200);
+        return $this->successResponse(['marcas' => $marcas]);
     }
 
     /**
@@ -46,14 +49,14 @@ class MarcaController extends Controller
             'nombre' => strtoupper($request->nombre),
         ]);
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
             'marca' => [
                 'id' => $marca->id,
                 'nombre' => $marca->nombre,
                 'created_at' => $marca->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -66,13 +69,13 @@ class MarcaController extends Controller
     {
         $marca = Marca::findOrFail($id);
 
-        return response()->json([
+        return $this->successResponse([
             'marca' => [
                 'id' => $marca->id,
                 'nombre' => $marca->nombre,
                 'created_at' => $marca->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -93,14 +96,14 @@ class MarcaController extends Controller
             'nombre' => strtoupper($request->nombre),
         ]);
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
             'marca' => [
                 'id' => $marca->id,
                 'nombre' => $marca->nombre,
                 'created_at' => $marca->created_at->format('Y-m-d h:i A'),
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -120,9 +123,8 @@ class MarcaController extends Controller
         }
         $marca->delete();
 
-        return response()->json([
+        return $this->successResponse([
             'message' => 200,
-        ], 200);
+        ]);
     }
 }
-
