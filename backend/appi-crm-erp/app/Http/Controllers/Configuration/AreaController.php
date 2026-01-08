@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Configuration;
 use Illuminate\Http\Request;
 use App\Models\Configuration\Area;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class AreaController extends Controller
 {
+    use ApiResponses;
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -27,7 +30,7 @@ class AreaController extends Controller
         $areas = Area::where("name", "like", "%".$search."%")->orderBy("id","desc")->paginate(25);
     
 
-    return response()->json([
+    return $this->successResponse([
         "total" =>$areas -> total(),
         "areas" => $areas ->map(function ($areas){
             return [
@@ -55,7 +58,7 @@ class AreaController extends Controller
             ]);
         }
         $area = Area::create ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "area" => [
                 "id"=> $area -> id,
@@ -90,7 +93,7 @@ class AreaController extends Controller
         }
         $area = Area::findOrFail ($id);
         $area -> update ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "area" => [
                 "id"=> $area -> id,
@@ -110,7 +113,7 @@ class AreaController extends Controller
         $area = Area :: findOrFail ($id);
         //Validacion por Requisicion o Papeleria
         $area ->delete ();
-            return response() ->json([
+            return $this->successResponse([
                 "message" => 200,
         ]);
     }
@@ -124,6 +127,6 @@ class AreaController extends Controller
         "RECUALA", "TEPIC", "TUXPAN", "LA YESCA", "BAHIA DE BANDERAS"
     ];
     
-    return response()->json($municipios);
+    return $this->successResponse($municipios);
     }
 }

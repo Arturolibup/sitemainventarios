@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Configuration\ProductCategorie;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class ProductCategorieController extends Controller
 {
+    use ApiResponses;
 
     public function __construct()
     {
@@ -29,7 +31,7 @@ class ProductCategorieController extends Controller
    
         $categories = ProductCategorie::where("name", "like", "%".$search."%")->orderBy("id","desc")->paginate(25);
         
-        return response()->json([
+        return $this->successResponse([
             "total" =>$categories -> total(),
             "categories" => $categories ->map(function ($categorie){
                 return [
@@ -63,7 +65,7 @@ class ProductCategorieController extends Controller
         }
 
         $categorie = ProductCategorie::create ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "categorie" => [
                 "id"=>$categorie->id,
@@ -108,7 +110,7 @@ class ProductCategorieController extends Controller
         }
         
         $categorie -> update ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "categorie" => [
                 "id"=>$categorie->id,
@@ -128,7 +130,7 @@ class ProductCategorieController extends Controller
         $categorie = ProductCategorie :: findOrFail ($id);
         //Validacion por Requisicion o Papeleria y producto 
         $categorie ->delete ();
-            return response() ->json([
+            return $this->successResponse([
                 "message" => 200,
         ]);
     }

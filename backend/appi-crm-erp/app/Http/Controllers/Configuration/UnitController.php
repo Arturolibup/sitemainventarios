@@ -7,9 +7,12 @@ use App\Models\configuration\Unit;
 use App\Http\Controllers\Controller;
 use App\Models\configuration\UnitTransform;
 use App\Http\Controllers\Configuration\UnitController;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class UnitController extends Controller
 {
+    use ApiResponses;
+
     public function index(Request $request)
     {
         $search = $request->get("search");
@@ -17,7 +20,7 @@ class UnitController extends Controller
    
         $units = Unit::where("name", "like", "%".$search."%")->orderBy("id","desc")->paginate(25);
         
-        return response()->json([
+        return $this->successResponse([
             "total" =>$units -> total(),
             "units" => $units ->map(function ($unit){
                 return [
@@ -48,7 +51,7 @@ class UnitController extends Controller
 
 
         $unit = Unit::create ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "unit" => [
                 "id"=>$unit->id,
@@ -88,7 +91,7 @@ class UnitController extends Controller
         
         $unit = Unit::findOrFail ($id);
         $unit -> update ($request->all());
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "unit" => [
                 "id"=>$unit->id,
@@ -107,7 +110,7 @@ class UnitController extends Controller
     public function delete_transform($id){
         $unit = UnitTransform::findOrFail($id);
         $unit -> delete();
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
         ]);
     }
@@ -126,7 +129,7 @@ class UnitController extends Controller
             "unit_id" => $request->unit_id,
             "unit_to_id"=>$request->unit_to_id,
         ]);
-        return response ()->json([
+        return $this->successResponse([
             "message" => 200,
             "unit" => [
                 "id"=>$unit->id,
@@ -147,7 +150,7 @@ class UnitController extends Controller
         $unit = Unit:: findOrFail ($id);
         //Validacion por Requisicion o Papeleria y producto 
         $unit ->delete ();
-            return response() ->json([
+            return $this->successResponse([
                 "message" => 200,
         ]);
     }

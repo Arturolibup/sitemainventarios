@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class RolePermissionController extends Controller
 {
+    use ApiResponses;
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -45,7 +48,7 @@ class RolePermissionController extends Controller
             return $rol;
         });
 
-        return response()->json([
+        return $this->successResponse([
             'total' => $roles->total(),
             'roles' => $data,
         ]);
@@ -118,16 +121,20 @@ class RolePermissionController extends Controller
 
         $role->load('permissions');
 
-        return response()->json([
-            'message' => 200,
-            'role'    => [
-                'id'                => $role->id,
-                'name'              => $role->name,
-                'permission'        => $role->permissions,                 // array de objetos
-                'permission_pluck'  => $role->permissions->pluck('name'),  // array de nombres
-                'created_format_at' => $role->created_at?->format('Y-m-d h:i A'),
+        return $this->successResponse(
+            [
+                'message' => 200,
+                'role'    => [
+                    'id'                => $role->id,
+                    'name'              => $role->name,
+                    'permission'        => $role->permissions,                 // array de objetos
+                    'permission_pluck'  => $role->permissions->pluck('name'),  // array de nombres
+                    'created_format_at' => $role->created_at?->format('Y-m-d h:i A'),
+                ],
             ],
-        ], 201);
+            null,
+            201
+        );
     }
 
 
@@ -163,7 +170,7 @@ public function update(Request $request, string $id)
 
     $role->load('permissions');
 
-    return response()->json([
+    return $this->successResponse([
         'message' => 'Rol actualizado correctamente',
         'role'    => [
             'id'               => $role->id,
@@ -232,6 +239,6 @@ public function update(Request $request, string $id)
         }
 
         $role->delete();
-        return response()->json(['message' => 200]);
+        return $this->successResponse(['message' => 200]);
     }
 }

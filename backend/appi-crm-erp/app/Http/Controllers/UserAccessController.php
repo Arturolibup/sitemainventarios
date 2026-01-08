@@ -9,9 +9,12 @@ use App\Models\Configuration\Area;
 use Spatie\Permission\Models\Role;
 use App\Models\Configuration\Subarea;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Concerns\ApiResponses;
 
 class UserAccessController extends Controller
 {
+    use ApiResponses;
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -34,7 +37,7 @@ class UserAccessController extends Controller
 
         $users = User::where ("name", "like","%".$search."%")->orderBy("id","desc")->paginate(25);
 
-        return response ()->json([
+        return $this->successResponse([
             "total" => $users-> total(),
             "users" => $users-> map(function($user) {
                 return [
@@ -75,7 +78,7 @@ class UserAccessController extends Controller
 
     //traer todos los roles.
     public function config(){
-        return response ()->json([
+        return $this->successResponse([
             "roles" => Role::all(),
             "areas" => Area::select('id', 'name', 'urs')->get(),
             "subareas" => Subarea::with('area')->select('id', 'name', 'area_id')->get(),
@@ -110,7 +113,7 @@ class UserAccessController extends Controller
         $user->assignRole($role); // asignarlo a un rol
 
 
-        return response()->json([
+        return $this->successResponse([
             "message" => 200,
             "user" => $this->formatUserResponse($user)
         ]);
@@ -236,7 +239,7 @@ class UserAccessController extends Controller
         //creamos el usuario 
         $user->update($request->all());
 
-        return response() ->json([
+        return $this->successResponse([
             "message" => 200,
             "user" => [ 
                 "id" => $user ->id,
@@ -271,9 +274,8 @@ class UserAccessController extends Controller
             Storage::delete($user->avatar);
         }
         $user->delete();
-        return response ()->json ([
+        return $this->successResponse([
             "message" => 200,
-
         ]);
     }
 }
