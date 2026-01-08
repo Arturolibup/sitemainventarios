@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, finalize, catchError } from 'rxjs';
+import { Observable, BehaviorSubject, finalize, catchError, map } from 'rxjs';
 import { AuthService } from 'src/app/modules/auth';
 import { URL_SERVICIOS } from 'src/app/config/config';
 
@@ -26,7 +26,7 @@ export class AreaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/areas";
     return this.http.post(URL, data, {headers:headers}).pipe(
-        
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -36,6 +36,7 @@ export class AreaService {
     let headers = new HttpHeaders ({'Authorization' :'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/areas?page="+page+"&search="+search;
     return this.http.get(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   } 
@@ -44,7 +45,7 @@ export class AreaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/areas/"+ID_AREA;
     return this.http.put(URL, data, {headers:headers}).pipe(
-      
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -54,6 +55,7 @@ export class AreaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/areas/"+ID_AREA;
     return this.http.delete(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       catchError((error) => {
         console.error('Error al crear el área:', error);
         throw error;
@@ -68,6 +70,7 @@ export class AreaService {
     let headers = new HttpHeaders({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS + "/areas/municipios";
     return this.http.get(URL, { headers: headers }).pipe(
+      map((res: any) => res?.data ?? res),
       catchError((error) => {
         console.error('Error al crear el área:', error);
         throw error;

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, finalize } from 'rxjs';
+import { Observable, BehaviorSubject, finalize, map } from 'rxjs';
 import { AuthService } from '../../auth';
 import { URL_SERVICIOS } from 'src/app/config/config';
 
@@ -25,6 +25,7 @@ export class  UsersService {
       let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
       let URL = URL_SERVICIOS+"/users";
       return this.http.post(URL, data, {headers:headers}).pipe(
+        map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false))
       );
     }
@@ -34,6 +35,7 @@ export class  UsersService {
       let headers = new HttpHeaders ({'Authorization':'Bearer ' + this.authservice.token});
       let URL = URL_SERVICIOS+"/users?page="+page+"&search="+search;
       return this.http.get(URL, {headers:headers}).pipe(
+        map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false))
       );
     } 
@@ -43,6 +45,7 @@ export class  UsersService {
       let headers = new HttpHeaders ({'Authorization':'Bearer ' + this.authservice.token});
       let URL = URL_SERVICIOS+"/users/config";
       return this.http.get(URL, {headers:headers}).pipe(
+        map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false))
       );
     } 
@@ -52,6 +55,7 @@ export class  UsersService {
       let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
       let URL = URL_SERVICIOS+"/users/"+ID_USER;
       return this.http.post(URL, data, {headers:headers}).pipe(
+        map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false))
       );
     }
@@ -61,6 +65,7 @@ export class  UsersService {
       let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
       let URL = URL_SERVICIOS+"/users/"+ID_USER;
       return this.http.delete(URL, {headers:headers}).pipe(
+        map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false))
       );
     }
@@ -70,6 +75,7 @@ export class  UsersService {
   let headers = new HttpHeaders({ 'Authorization': 'Bearer ' + this.authservice.token });
   let URL = URL_SERVICIOS + "/subareas/search?search=" + encodeURIComponent(search);
   return this.http.get(URL, { headers: headers }).pipe(
+    map((res: any) => res?.data ?? res),
     finalize(() => this.isLoadingSubject.next(false))
   );
 }
