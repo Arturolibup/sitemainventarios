@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, finalize } from 'rxjs';
+import { Observable, BehaviorSubject, finalize, map } from 'rxjs';
 import { URL_SERVICIOS } from 'src/app/config/config';
 import { AuthService } from 'src/app/modules/auth';
 
@@ -26,7 +26,7 @@ export class SubareaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/subareas";
     return this.http.post(URL, data, {headers:headers}).pipe(
-        
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -36,6 +36,7 @@ export class SubareaService {
     let headers = new HttpHeaders ({'Authorization' :'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/subareas?page="+page+"&search="+search;
     return this.http.get(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   } 
@@ -44,7 +45,7 @@ export class SubareaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/subareas/"+ID_SUBAREA;
     return this.http.put(URL, data, {headers:headers}).pipe(
-      
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -54,7 +55,7 @@ export class SubareaService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/subareas/"+ID_SUBAREA;
     return this.http.delete(URL, {headers:headers}).pipe(
-      
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -65,7 +66,7 @@ export class SubareaService {
     let headers = new HttpHeaders({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS + "/subareas/municipios";
     return this.http.get(URL, { headers: headers }).pipe(
-      
+      map((res: any) => res?.data ?? res),
         finalize(() => this.isLoadingSubject.next(false)) // Indica que la carga ha terminado
     );
   }
@@ -81,6 +82,7 @@ export class SubareaService {
     const headers = new HttpHeaders({ 'Authorization': 'Bearer ' + this.authservice.token });
     const URL = `${URL_SERVICIOS}/subareas/validate-unique?field=${field}&value=${encodeURIComponent(value)}`;
     return this.http.get(URL, { headers }).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -91,9 +93,9 @@ export class SubareaService {
     const headers = new HttpHeaders({ 'Authorization': 'Bearer ' + this.authservice.token });
     const URL = `${URL_SERVICIOS}/subareas/search?term=${encodeURIComponent(search)}`;
     return this.http.get(URL, { headers }).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
 
 }
-

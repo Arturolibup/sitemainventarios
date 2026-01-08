@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, finalize } from 'rxjs';
+import { Observable, BehaviorSubject, finalize, map } from 'rxjs';
 import { URL_SERVICIOS } from 'src/app/config/config';
 import { AuthService } from 'src/app/modules/auth';
 
@@ -24,6 +24,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units";
     return this.http.post(URL, data, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -33,6 +34,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' :'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units?page="+page+"&search="+search;
     return this.http.get(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   } 
@@ -43,6 +45,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units/"+ID_UNIT;
     return this.http.put(URL, data, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -52,6 +55,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units/"+ID_UNIT;
     return this.http.delete(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -61,6 +65,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units/add-transform";
     return this.http.post(URL, data, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -69,6 +74,7 @@ export class UnitsService {
     let headers = new HttpHeaders ({'Authorization' : 'Bearer ' + this.authservice.token});
     let URL = URL_SERVICIOS+"/units/delete-transform/"+ID_UNIT;
     return this.http.delete(URL, {headers:headers}).pipe(
+      map((res: any) => res?.data ?? res),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
