@@ -53,6 +53,10 @@ export class AuthService implements OnDestroy {
     this.restoreSession();
   }
 
+  private unwrap<T>(res: any): T {
+    return res?.data ?? res;
+  }
+
   // ===============================
   // INICIALIZACIÓN DE SESIÓN
   // ===============================
@@ -86,7 +90,8 @@ export class AuthService implements OnDestroy {
 
     return this.http.post<any>(`${URL_SERVICIOS}/auth/login`, { email, password }).pipe(
       map(res => {
-        const token = res?.access_token || res?.token;
+        const payload = this.unwrap<any>(res);
+        const token = payload?.access_token || payload?.token;
         if (!token) throw new Error('Token no recibido');
 
         this.token = token;
@@ -132,16 +137,17 @@ export class AuthService implements OnDestroy {
 
     return this.http.get<any>(`${URL_SERVICIOS}/me`, { headers }).pipe(
       map(res => {
+        const payload = this.unwrap<any>(res);
         const user = new UserModel();
         user.setUser({
-          ...res,
-          roles: res.roles || [],
-          permissions: res.permissions || []
+          ...payload,
+          roles: payload.roles || [],
+          permissions: payload.permissions || []
         });
 
         this.user = user;
         this.currentUserSubject.next(user);
-        localStorage.setItem('auth_user', JSON.stringify(res));
+        localStorage.setItem('auth_user', JSON.stringify(payload));
 
         return user;
       })
