@@ -166,6 +166,9 @@ private function formatVehicleResponse(Car $vehicle): array
             'numero_serie' => Str::upper($request->numero_serie ?? ''),
             'numero_inven' => Str::upper($request->numero_inven ?? ''),
             'color' => Str::upper($request->color ?? ''),
+            'state' => $request->has('state') && is_string($request->state) && in_array($request->state, ['0', '1'], true)
+                ? (int) $request->state
+                : $request->state,
             //'state' => $request->state === 'Activo' ? 1 : 0,
         ]);
 
@@ -260,6 +263,9 @@ private function formatVehicleResponse(Car $vehicle): array
             'numero_serie' => Str::upper($request->numero_serie ?? ''),
             'numero_inven' => Str::upper($request->numero_inven ?? ''),
             'color' => Str::upper($request->color ?? ''),
+            'state' => $request->has('state') && is_string($request->state) && in_array($request->state, ['0', '1'], true)
+                ? (int) $request->state
+                : $request->state,
             //'state' => $request->state === 'Activo' ? 1 : 0,
         ]);
 
