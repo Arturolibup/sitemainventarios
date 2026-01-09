@@ -43,10 +43,15 @@ export class CarsService {
     };
   }
 
+  private unwrap<T>(res: any): T {
+    return res?.data ?? res;
+  }
+
   getSubareas(): Observable<{ subareas: Subarea[] }> {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/search-subareas?query=`;
     return this.http.get<{ subareas: Subarea[] }>(URL, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ subareas: Subarea[] }>(resp)),
       tap(resp => console.log('Subáreas cargadas:', resp.subareas)),
       catchError(this.handleError('Error al cargar subáreas')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -57,6 +62,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/search-marcas?query=`;
     return this.http.get<{ marcas: Marca[] }>(URL, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ marcas: Marca[] }>(resp)),
       tap(resp => console.log('Marcas cargadas:', resp.marcas)),
       catchError(this.handleError('Error al cargar marcas')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -68,6 +74,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/marcas`;
     return this.http.post<{ marca: Marca }>(URL, data, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ marca: Marca }>(resp)),
       tap(resp => console.log('Marca creada:', resp)),
       catchError(this.handleError('Error al crear marca')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -78,6 +85,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/tipos`;
     return this.http.post <{tipo: Tipo}>(URL, data, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ tipo: Tipo }>(resp)),
       tap(resp => console.log('Tipo creado:', resp)),
       catchError(this.handleError('Error al crear tipo')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -88,6 +96,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/search-tipos?query=&marca_id=${marcaId}`;
     return this.http.get<{ tipos: Tipo[] }>(URL, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ tipos: Tipo[] }>(resp)),
       tap(resp => console.log('Tipos cargados para marca:', marcaId, resp.tipos)),
       catchError(this.handleError('Error al cargar tipos')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -99,6 +108,7 @@ export class CarsService {
     let URL = `${URL_SERVICIOS}/cars/validate?field=${encodeURIComponent(field)}&value=${encodeURIComponent(value.toUpperCase())}`;
     if (id) URL += `&id=${id}`;
     return this.http.get<{ exists: boolean }>(URL, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ exists: boolean }>(resp)),
       tap(resp => console.log('Validación de unicidad:', field, resp)),
       catchError(this.handleError('Error al validar unicidad')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -109,6 +119,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars`;
     return this.http.post<{ vehicle: Vehicle; message?: string }>(URL, data, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ vehicle: Vehicle; message?: string }>(resp)),
       tap(resp => console.log('Vehículo registrado:', resp)),
       catchError(this.handleError('Error al registrar vehículo')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -129,10 +140,14 @@ export class CarsService {
     meta: any;
   }>(URL, { headers: this.getHeaders() }).pipe(
     map((resp: any) => {
+      const unwrapped = this.unwrap<any>(resp);
+      const meta = unwrapped?.meta ?? resp?.meta;
+      const vehicles = unwrapped?.data ?? unwrapped?.vehicles ?? (Array.isArray(unwrapped) ? unwrapped : resp?.data);
+      const total = meta?.total ?? unwrapped?.total ?? resp?.meta?.total;
       return {
-        vehicles: resp.data,
-        total: resp.meta.total,
-        meta: resp.meta
+        vehicles,
+        total,
+        meta
       };
     }),
     tap(resp => console.log('Lista de vehículos:', resp)),
@@ -147,6 +162,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/${id}`;
     return this.http.get<{ vehicle: Vehicle }>(URL, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ vehicle: Vehicle }>(resp)),
       tap(resp => console.log('Vehículo obtenido:', id, resp)),
       catchError(this.handleError('Error al obtener vehículo')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -157,6 +173,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/${id}`;
     return this.http.post<{ vehicle: Vehicle; message?: string }>(URL, data, { headers: this.getHeaders() }).pipe(
+      map((resp: any) => this.unwrap<{ vehicle: Vehicle; message?: string }>(resp)),
       tap(resp => console.log('Vehículo actualizado:', id, resp)),
       catchError(this.handleError('Error al actualizar vehículo')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -167,7 +184,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/search-subareas?query=${encodeURIComponent(query)}`;
     return this.http.get<{ subareas: Subarea[] }>(URL, { headers: this.getHeaders() }).pipe(
-      map(response => response.subareas),
+      map((resp: any) => this.unwrap<{ subareas: Subarea[] }>(resp).subareas),
       tap(subareas => console.log('Subáreas buscadas:', query, subareas)),
       catchError(this.handleError('Error al buscar subáreas')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -178,7 +195,7 @@ export class CarsService {
     this.isLoadingSubject.next(true);
     const URL = `${URL_SERVICIOS}/cars/search-marcas?query=${encodeURIComponent(query)}`;
     return this.http.get<{ marcas: Marca[] }>(URL, { headers: this.getHeaders() }).pipe(
-      map(response => response.marcas),
+      map((resp: any) => this.unwrap<{ marcas: Marca[] }>(resp).marcas),
       tap(marcas => console.log('Marcas buscadas:', query, marcas)),
       catchError(this.handleError('Error al buscar marcas')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -190,7 +207,7 @@ export class CarsService {
     let URL = `${URL_SERVICIOS}/cars/search-tipos?query=${encodeURIComponent(query)}`;
     if (marca_id) URL += `&marca_id=${marca_id}`;
     return this.http.get<{ tipos: Tipo[] }>(URL, { headers: this.getHeaders() }).pipe(
-      map(response => response.tipos),
+      map((resp: any) => this.unwrap<{ tipos: Tipo[] }>(resp).tipos),
       tap(tipos => console.log('Tipos buscados:', query, tipos)),
       catchError(this.handleError('Error al buscar tipos')),
       finalize(() => this.isLoadingSubject.next(false))
@@ -201,6 +218,7 @@ export class CarsService {
   this.isLoadingSubject.next(true);
   const URL = `${URL_SERVICIOS}/cars/${id}`;
   return this.http.delete<{ message: string }>(URL, { headers: this.getHeaders() }).pipe(
+    map((resp: any) => this.unwrap<{ message: string }>(resp)),
     tap(resp => console.log('Vehículo eliminado:', id, resp)),
     catchError(this.handleError('Error al eliminar vehículo')),
     finalize(() => this.isLoadingSubject.next(false))
