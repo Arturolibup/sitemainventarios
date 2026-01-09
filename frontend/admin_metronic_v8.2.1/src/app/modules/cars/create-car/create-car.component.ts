@@ -422,6 +422,10 @@ export class CreateCarComponent implements OnInit {
     if (values.estado_asigna) formData.append('estado_asigna', values.estado_asigna);
     if (this.IMAGEN_VEHICULO) formData.append('imagen_vehiculo', this.IMAGEN_VEHICULO);
     formData.append('state', values.state.toString());
+    const subarea = this.subareas.find(s => s.id === values.subarea_asigna);
+    if (subarea?.area?.id) {
+      formData.append('area_id', subarea.area.id.toString());
+    }
 
     this.carsService.registerVehicle(formData).subscribe({
       next: (resp: any) => {
