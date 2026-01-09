@@ -270,7 +270,7 @@ private function formatVehicleResponse(Car $vehicle): array
                 'marca_id' => 'required|exists:marcas,id',
                 'tipo_id' => 'nullable|exists:tipos,id',
                 'modelo' => 'nullable|string|max:100',
-                'placa' => ['nullable', 'required', 'string', 'max:50', Rule::unique('vehiculos', 'placa')->ignore($id)],
+                'placa' => ['nullable', 'string', 'max:50', Rule::unique('vehiculos', 'placa')->ignore($id)],
                 'placa_anterior' => 'nullable|string|max:50',
                 'cilindro' => 'nullable|string|max:50',
                 'numero_serie' => ['nullable', 'string', 'max:100', Rule::unique('vehiculos', 'numero_serie')->ignore($id)],
